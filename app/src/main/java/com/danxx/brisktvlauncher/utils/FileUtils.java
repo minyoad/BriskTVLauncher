@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.danxx.brisktvlauncher.BuildConfig;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -16,11 +17,16 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -53,6 +59,34 @@ public class FileUtils {
             e.printStackTrace();
         }
     }
+
+    public static List<String> readFileFromUrl(String url){
+        URL mUrl = null;
+        List<String> csvLine = new ArrayList<>();
+        String[] content = null;
+        try {
+            mUrl = new URL(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        try {
+            assert mUrl != null;
+            URLConnection connection = mUrl.openConnection();
+            BufferedReader br = new BufferedReader(new
+                    InputStreamReader(connection.getInputStream()));
+            String line = "";
+            while((line = br.readLine()) != null){
+                csvLine.add(line);
+//                content = line.split(",");
+//                csvLine.add(content);
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return csvLine;
+    }
+
 
     /**
      * 读取文本文件

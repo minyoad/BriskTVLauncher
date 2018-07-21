@@ -3,6 +3,7 @@ package com.danxx.brisktvlauncher.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +24,7 @@ import com.danxx.brisktvlauncher.adapter.BaseRecyclerViewHolder;
 import com.danxx.brisktvlauncher.model.VideoBean;
 import com.danxx.brisktvlauncher.module.RecentMediaStorage;
 import com.danxx.brisktvlauncher.module.Settings;
+import com.danxx.brisktvlauncher.utils.FileUtils;
 import com.danxx.brisktvlauncher.widget.media.CustomMediaController;
 import com.danxx.brisktvlauncher.widget.media.IjkVideoView;
 import com.danxx.brisktvlauncher.widget.media.MeasureHelper;
@@ -43,6 +45,7 @@ import tv.danmaku.ijk.media.player.misc.ITrackInfo;
  */
 public class LiveVideoActivity extends AppCompatActivity implements TracksFragment.ITrackHolder ,View.OnFocusChangeListener {
     private static final String TAG = "LiveVideoActivity";
+    private static final String TV_CHANNEL_LIST_URL = "http://ssvip.mybacc.com/tv.txt";
 
     private String mVideoPath;
     private Uri mVideoUri;
@@ -65,7 +68,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     private Settings mSettings;
     private boolean mBackPressed;
-    private List<VideoBean> datas = new ArrayList<>();;
+    private List<VideoBean> datas = new ArrayList<>();
     private String []names = new String[]{
             "香港电影","综艺频道","高清音乐","动作电影","电影","周星驰","成龙","喜剧","儿歌","LIVE生活"
     };
@@ -99,7 +102,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live_video);
         initTiemData();
-        initVideoList();
+//        initVideoList();
         mSettings = new Settings(this);
 
         // handle arguments
@@ -164,13 +167,41 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     }
     public void initTiemData()
     {
-        for(int i = 0; i < 10; i++)
-        {
-            VideoBean videoBean = new VideoBean();
-            videoBean.setTvName(names[i]);
-            videoBean.setTvUrl(urls[i]);
-            datas.add(videoBean);
-        }
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<String> videoList= FileUtils.readFileFromUrl(TV_CHANNEL_LIST_URL);
+
+                for (String line:videoList){
+                    if (line.contains(",")){
+                        String[] content=line.split(",");
+                        VideoBean videoBean = new VideoBean();
+                        videoBean.setTvName(content[0]);
+                        videoBean.setTvUrl(content[1]);
+                        datas.add(videoBean);
+                    }
+                }
+
+                runOnUiThread(new Runnable() {
+                                  @Override
+                                  public void run() {
+                                      initVideoList();
+                                  }
+                              }
+
+                );
+
+            }
+        });
+
+
+//        for(int i = 0; i < 10; i++)
+//        {
+//            VideoBean videoBean = new VideoBean();
+//            videoBean.setTvName(names[i]);
+//            videoBean.setTvUrl(urls[i]);
+//            datas.add(videoBean);
+//        }
 //        ivLoading.setVisibility(View.GONE);
 //        adapter.notifyDataSetChanged();
     }
@@ -200,6 +231,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
         });
 //        findViewById(R.id.videoContent).setOnFocusChangeListener(this);
+
 
         myAdapter = new MyAdapter();
         myAdapter.setData(datas);
@@ -231,8 +263,17 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
      * @param url 直播地址
      */
     private void playVideo(String url ,int index){
+
         playIndex = index;
-        liveName.setText(myAdapter.getItemData(playIndex).getTvName());
+
+        if (myAdapter==null){
+            return;
+        }
+
+        VideoBean bean=myAdapter.getItemData(playIndex);
+        if (bean!=null)
+            liveName.setText(bean.getTvName());
+
         if (url != null) {
             mVideoView.pause();
             mVideoView.setVideoPath(url);
