@@ -23,7 +23,6 @@ import com.danxx.brisktvlauncher.R;
 import com.danxx.brisktvlauncher.adapter.BaseRecyclerViewAdapter;
 import com.danxx.brisktvlauncher.adapter.BaseRecyclerViewHolder;
 import com.danxx.brisktvlauncher.model.VideoBean;
-import com.danxx.brisktvlauncher.module.RecentMediaStorage;
 import com.danxx.brisktvlauncher.module.Settings;
 import com.danxx.brisktvlauncher.utils.FileUtils;
 import com.danxx.brisktvlauncher.widget.media.CustomMediaController;
@@ -36,10 +35,10 @@ import com.open.androidtvwidget.recycle.RecyclerViewTV;
 import com.open.androidtvwidget.view.MainUpView;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -56,10 +55,13 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     private String mVideoPath;
     private Uri mVideoUri;
 
+    private HashMap<String,List> mChannelMap;
+
     //    private AndroidMediaController mMediaController;
     private CustomMediaController customMediaController;
     private IjkVideoView mVideoView;
     private RecyclerViewTV videoList;
+    private RecyclerViewTV videoList2;
 //    private TextView mToastTextView;
 //    private TableLayout mHudView;
 //    private DrawerLayout mDrawerLayout;
@@ -68,29 +70,31 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     /**播放指示器**/
     private int playIndex = 0;
     private View oldView;
-    MyAdapter myAdapter;
+    MyCategoryAdapter myAdapter;
+    MyAdapter myAdapter2;
+
     MainUpView mainUpView1;
     RecyclerViewBridge mRecyclerViewBridge;
 
     private Settings mSettings;
     private boolean mBackPressed;
     private List<VideoBean> datas = new ArrayList<>();
-    private String []names = new String[]{
-            "香港电影","综艺频道","高清音乐","动作电影","电影","周星驰","成龙","喜剧","儿歌","LIVE生活"
-    };
-
-    private String []urls = new String[]{
-            "http://live.gslb.letv.com/gslb?stream_id=lb_hkmovie_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
-            "http://live.gslb.letv.com/gslb?stream_id=lb_ent_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
-            "http://live.gslb.letv.com/gslb?stream_id=lb_music_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_dzdy_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_movie_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_zxc_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_cl_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_comedy_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_erge_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_livemusic_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1"
-    };
+//    private String []names = new String[]{
+//            "香港电影","综艺频道","高清音乐","动作电影","电影","周星驰","成龙","喜剧","儿歌","LIVE生活"
+//    };
+//
+//    private String []urls = new String[]{
+//            "http://live.gslb.letv.com/gslb?stream_id=lb_hkmovie_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
+//            "http://live.gslb.letv.com/gslb?stream_id=lb_ent_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
+//            "http://live.gslb.letv.com/gslb?stream_id=lb_music_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_dzdy_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_movie_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_zxc_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_cl_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_comedy_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_erge_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
+//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_livemusic_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1"
+//    };
     private long TV_CHANNEL_UPDATE_INTERVAL=30*60*1000;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle ,int index) {
@@ -122,8 +126,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             mVideoPath=mSettings.getLastVideoPath();
         }
 
-        Intent intent = getIntent();
-        String intentAction = intent.getAction();
+//        Intent intent = getIntent();
+//        String intentAction = intent.getAction();
         /**取消对Intent的处理**/
 //        if (!TextUtils.isEmpty(intentAction)) {
 //            if (intentAction.equals(Intent.ACTION_VIEW)) {
@@ -152,9 +156,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 //            }
 //        }
 
-        if (!TextUtils.isEmpty(mVideoPath)) {
-            new RecentMediaStorage(this).saveUrlAsync(mVideoPath);
-        }
+//        if (!TextUtils.isEmpty(mVideoPath)) {
+//            new RecentMediaStorage(this).saveUrlAsync(mVideoPath);
+//        }
 
 //        customMediaController = new CustomMediaController(this, false);
 //        customMediaController.setVisibility(View.GONE);
@@ -209,6 +213,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 }
 
 
+                String cateName="";
+
+                mChannelMap=new HashMap<>();
                 for (String line:videoList){
                     if (line.contains(",")){
                         String[] content=line.split(",");
@@ -216,6 +223,22 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                         videoBean.setTvName(content[0]);
                         videoBean.setTvUrl(content[1]);
                         datas.add(videoBean);
+                    }
+                    else{
+                        if (datas.size()==0){
+                            cateName=line;
+                        }
+                        else{
+                            List list=mChannelMap.get(cateName);
+                            if(list!=null){
+                                datas.addAll(list);
+                            }
+
+                            mChannelMap.put(cateName,datas);
+                            datas=new ArrayList<>();
+                            cateName=line;
+                        }
+
                     }
                 }
 
@@ -231,20 +254,11 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
         });
 
-
-//        for(int i = 0; i < 10; i++)
-//        {
-//            VideoBean videoBean = new VideoBean();
-//            videoBean.setTvName(names[i]);
-//            videoBean.setTvUrl(urls[i]);
-//            datas.add(videoBean);
-//        }
-//        ivLoading.setVisibility(View.GONE);
-//        adapter.notifyDataSetChanged();
     }
 
     private void initVideoList(){
         videoList = (RecyclerViewTV) findViewById(R.id.videoList);
+        videoList2 = (RecyclerViewTV) findViewById(R.id.videoList2);
 
         mainUpView1 = (MainUpView) findViewById(R.id.mainUpView);
         mainUpView1.setEffectBridge(new RecyclerViewBridge());
@@ -270,18 +284,75 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 //        findViewById(R.id.videoContent).setOnFocusChangeListener(this);
 
 
-        myAdapter = new MyAdapter();
-        myAdapter.setData(datas);
+
+        ArrayList catelist= new ArrayList();
+        catelist.addAll(mChannelMap.keySet());
+
+
+        myAdapter = new MyCategoryAdapter();
+        myAdapter.setData(catelist);
         videoList.setAdapter(myAdapter);
         videoList.setFocusable(false);
         myAdapter.notifyDataSetChanged();
         myAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, Object data) {
+
+                String catename=data.toString();
+
+
+                showChannelList(catename);
+
+
+
+//                String url = ((VideoBean)data).getTvUrl();
+//                playVideo(url,position);
+//                if(videoList.getVisibility() == View.VISIBLE) {
+//                    videoList.setVisibility(View.INVISIBLE);
+////                    tips.setVisibility(View.VISIBLE);
+//
+//
+//                    /**隐藏焦点**/
+//                    mRecyclerViewBridge.setVisibleWidget(true);
+//                }
+            }
+
+            @Override
+            public void onItemLongClick(int position, Object data) {
+
+            }
+        });
+
+
+        LinearLayoutManagerTV linearLayoutManager2 = new LinearLayoutManagerTV(LiveVideoActivity.this);
+        linearLayoutManager2.setOrientation(LinearLayoutManager.VERTICAL);
+        linearLayoutManager2.setOnChildSelectedListener(new OnChildSelectedListener() {
+            @Override
+            public void onChildSelected(RecyclerView parent, View focusview, int position, int dy) {
+                focusview.bringToFront();
+                if (oldView == null) {
+                    Log.d("danxx", "oldView == null");
+                }
+                mRecyclerViewBridge.setFocusView(focusview, oldView, 1.1f);
+                oldView = focusview;
+            }
+        });
+
+        videoList2.setLayoutManager(linearLayoutManager2);
+        myAdapter2 = new MyAdapter();
+//        myAdapter2.setData(catelist);
+        videoList2.setAdapter(myAdapter2);
+        videoList2.setFocusable(false);
+//        myAdapter2.notifyDataSetChanged();
+        myAdapter2.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(int position, Object data) {
                 String url = ((VideoBean)data).getTvUrl();
                 playVideo(url,position);
-                if(videoList.getVisibility() == View.VISIBLE) {
+                if(videoList2.getVisibility() == View.VISIBLE) {
+                    videoList2.setVisibility(View.INVISIBLE);
                     videoList.setVisibility(View.INVISIBLE);
+
 //                    tips.setVisibility(View.VISIBLE);
 
 
@@ -295,6 +366,26 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
             }
         });
+
+
+    }
+
+    public void showChannelList(String cateName){
+        videoList2.setVisibility(View.VISIBLE);
+
+        List channelList=mChannelMap.get(cateName);
+
+        myAdapter2.setData(channelList);
+        myAdapter2.notifyDataSetChanged();
+
+//        if(videoList2.getVisibility() == View.VISIBLE) {
+//            videoList2.setVisibility(View.INVISIBLE);
+////                    tips.setVisibility(View.VISIBLE);
+//
+//
+//            /**隐藏焦点**/
+//            mRecyclerViewBridge.setVisibleWidget(true);
+//        }
     }
 
     /**
@@ -307,7 +398,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         if (myAdapter!=null){
 
-            VideoBean bean=myAdapter.getItemData(playIndex);
+            VideoBean bean=myAdapter2.getItemData(playIndex);
             if (bean!=null) {
                 liveName.setVisibility(View.VISIBLE);
                 liveName.setText(bean.getTvName());
@@ -357,7 +448,14 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 videoList.requestFocus();
             }
         }else if(KeyEvent.KEYCODE_BACK == keyCode){
-            if(videoList.getVisibility() == View.VISIBLE){
+            if(videoList2.getVisibility() == View.VISIBLE){
+                videoList2.setVisibility(View.INVISIBLE);
+//                tips.setVisibility(View.VISIBLE);
+                videoList.setVisibility(View.VISIBLE);
+                mRecyclerViewBridge.setVisibleWidget(true);
+                return true;
+            }
+            else if(videoList.getVisibility() == View.VISIBLE){
                 videoList.setVisibility(View.INVISIBLE);
                 tips.setVisibility(View.VISIBLE);
                 mRecyclerViewBridge.setVisibleWidget(true);
@@ -506,6 +604,32 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         @Override
         protected void bindData(BaseRecyclerViewHolder holder, int position) {
             ((MyViewHolder)holder).name.setText(getItemData(position).getTvName());
+        }
+        class MyViewHolder extends BaseRecyclerViewHolder{
+            TextView name;
+            public MyViewHolder(View itemView) {
+                super(itemView);
+                name = (TextView) itemView.findViewById(R.id.name);
+            }
+
+            @Override
+            protected View getView() {
+                return null;
+            }
+        }
+    }
+    class MyCategoryAdapter extends BaseRecyclerViewAdapter<String> {
+
+        @Override
+        protected BaseRecyclerViewHolder createItem(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(LiveVideoActivity.this).inflate(R.layout.item_live,null);
+            MyViewHolder myViewHolder = new MyViewHolder(view);
+            return myViewHolder;
+        }
+
+        @Override
+        protected void bindData(BaseRecyclerViewHolder holder, int position) {
+            ((MyViewHolder)holder).name.setText(getItemData(position));
         }
         class MyViewHolder extends BaseRecyclerViewHolder{
             TextView name;
