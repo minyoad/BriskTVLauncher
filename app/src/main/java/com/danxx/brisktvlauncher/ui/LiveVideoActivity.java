@@ -74,7 +74,10 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     MyAdapter myAdapter2;
 
     MainUpView mainUpView1;
+    MainUpView mMainUpView2;
     RecyclerViewBridge mRecyclerViewBridge;
+    RecyclerViewBridge mRecyclerViewBridge2;
+
 
     private Settings mSettings;
     private boolean mBackPressed;
@@ -299,22 +302,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             public void onItemClick(int position, Object data) {
 
                 String catename=data.toString();
-
-
                 showChannelList(catename);
 
-
-
-//                String url = ((VideoBean)data).getTvUrl();
-//                playVideo(url,position);
-//                if(videoList.getVisibility() == View.VISIBLE) {
-//                    videoList.setVisibility(View.INVISIBLE);
-////                    tips.setVisibility(View.VISIBLE);
-//
-//
-//                    /**隐藏焦点**/
-//                    mRecyclerViewBridge.setVisibleWidget(true);
-//                }
             }
 
             @Override
@@ -323,6 +312,12 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
         });
 
+        mMainUpView2=new MainUpView(this);
+        mMainUpView2.setEffectBridge(new RecyclerViewBridge());
+        mRecyclerViewBridge2 = (RecyclerViewBridge) mMainUpView2.getEffectBridge();
+        mRecyclerViewBridge2.setUpRectResource(R.drawable.item_rectangle);
+        mRecyclerViewBridge2.setTranDurAnimTime(200);
+        mRecyclerViewBridge2.setShadowResource(R.drawable.item_shadow);
 
         LinearLayoutManagerTV linearLayoutManager2 = new LinearLayoutManagerTV(LiveVideoActivity.this);
         linearLayoutManager2.setOrientation(LinearLayoutManager.VERTICAL);
@@ -333,7 +328,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 if (oldView == null) {
                     Log.d("danxx", "oldView == null");
                 }
-                mRecyclerViewBridge.setFocusView(focusview, oldView, 1.1f);
+                mRecyclerViewBridge2.setFocusView(focusview, oldView, 1.1f);
                 oldView = focusview;
             }
         });
@@ -357,7 +352,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
 
                     /**隐藏焦点**/
-                    mRecyclerViewBridge.setVisibleWidget(true);
+                    mRecyclerViewBridge2.setVisibleWidget(true);
                 }
             }
 
@@ -378,6 +373,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         myAdapter2.setData(channelList);
         myAdapter2.notifyDataSetChanged();
 
+        videoList2.requestFocus();
 //        if(videoList2.getVisibility() == View.VISIBLE) {
 //            videoList2.setVisibility(View.INVISIBLE);
 ////                    tips.setVisibility(View.VISIBLE);
@@ -396,7 +392,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         playIndex = index;
 
-        if (myAdapter!=null){
+        if (myAdapter2!=null){
 
             VideoBean bean=myAdapter2.getItemData(playIndex);
             if (bean!=null) {
@@ -458,6 +454,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             else if(videoList.getVisibility() == View.VISIBLE){
                 videoList.setVisibility(View.INVISIBLE);
                 tips.setVisibility(View.VISIBLE);
+                videoList.requestFocus();
                 mRecyclerViewBridge.setVisibleWidget(true);
                 return true;
             }
