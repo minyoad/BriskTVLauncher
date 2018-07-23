@@ -22,6 +22,8 @@ import android.preference.PreferenceManager;
 
 import com.danxx.brisktvlauncher.R;
 
+import java.util.Date;
+
 public class Settings {
     private Context mAppContext;
     private SharedPreferences mSharedPreferences;
@@ -99,5 +101,29 @@ public class Settings {
     public void setLastDirectory(String path) {
         String key = mAppContext.getString(R.string.pref_key_last_directory);
         mSharedPreferences.edit().putString(key, path).apply();
+    }
+
+    public void setChannelUpdate(Date update){
+        String key="pref.tv_channel_update";
+        mSharedPreferences.edit().putLong(key, update.getTime()).apply();
+
+    }
+    public Date getChannelUpdate(){
+        String key="pref.tv_channel_update";
+        long update=mSharedPreferences.getLong(key,0);
+
+        return new Date(update);
+    }
+
+    public String getLastVideoPath(){
+        String key="pref.last_tv_channel";
+
+        return mSharedPreferences.getString(key,null);
+    }
+
+    public void setLastVideoPath(String path){
+        String key="pref.last_tv_channel";
+        mSharedPreferences.edit().putString(key, path).apply();
+
     }
 }

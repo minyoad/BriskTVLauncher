@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,7 +35,11 @@ import com.open.androidtvwidget.recycle.OnChildSelectedListener;
 import com.open.androidtvwidget.recycle.RecyclerViewTV;
 import com.open.androidtvwidget.view.MainUpView;
 
+import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -46,6 +51,7 @@ import tv.danmaku.ijk.media.player.misc.ITrackInfo;
 public class LiveVideoActivity extends AppCompatActivity implements TracksFragment.ITrackHolder ,View.OnFocusChangeListener {
     private static final String TAG = "LiveVideoActivity";
     private static final String TV_CHANNEL_LIST_URL = "http://ssvip.mybacc.com/tv.txt";
+    private static final String LOCAL_TV_CHANNEL_FILE = "tv.txt";
 
     private String mVideoPath;
     private Uri mVideoUri;
@@ -85,6 +91,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_erge_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
             "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_livemusic_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1"
     };
+    private long TV_CHANNEL_UPDATE_INTERVAL=30*60*1000;
+
     public static Intent newIntent(Context context, String videoPath, String videoTitle ,int index) {
         Intent intent = new Intent(context, LiveVideoActivity.class);
         intent.putExtra("videoPath", videoPath);
@@ -108,7 +116,12 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
         playIndex = getIntent().getIntExtra("index",0);
-        mVideoPath = urls[playIndex];
+//        mVideoPath = urls[playIndex];
+
+        if(mVideoPath==null){
+            mVideoPath=mSettings.getLastVideoPath();
+        }
+
         Intent intent = getIntent();
         String intentAction = intent.getAction();
         /**取消对Intent的处理**/
@@ -170,7 +183,31 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                List<String> videoList= FileUtils.readFileFromUrl(TV_CHANNEL_LIST_URL);
+
+                List<String> videoList=null;
+                File tvChannel = new File(LiveVideoActivity.this.getFilesDir(), LOCAL_TV_CHANNEL_FILE);
+                if(tvChannel.exists()){
+                    String content=FileUtils.read(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE);
+
+                    String[] videolist=content.split("\r\n");
+                    videoList= new ArrayList<>();
+                    for(String video:videolist){
+                        videoList.add(video);
+                    }
+
+                }
+
+                if (!tvChannel.exists() || videoList.size()==0 || mSettings.getChannelUpdate().getTime()-(new Date().getTime())>TV_CHANNEL_UPDATE_INTERVAL){ //30min update from server
+                    videoList= FileUtils.readFileFromUrl(TV_CHANNEL_LIST_URL);
+                    String content= TextUtils.join("\r\n",videoList);
+                    if(videoList!=null && videoList.size()>0) {
+                        FileUtils.write(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE,content);
+
+                        mSettings.setChannelUpdate(new Date());
+                    }
+
+                }
+
 
                 for (String line:videoList){
                     if (line.contains(",")){
@@ -245,7 +282,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 playVideo(url,position);
                 if(videoList.getVisibility() == View.VISIBLE) {
                     videoList.setVisibility(View.INVISIBLE);
-                    tips.setVisibility(View.VISIBLE);
+//                    tips.setVisibility(View.VISIBLE);
+
+
                     /**隐藏焦点**/
                     mRecyclerViewBridge.setVisibleWidget(true);
                 }
@@ -266,13 +305,25 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         playIndex = index;
 
-        if (myAdapter==null){
-            return;
+        if (myAdapter!=null){
+
+            VideoBean bean=myAdapter.getItemData(playIndex);
+            if (bean!=null) {
+                liveName.setVisibility(View.VISIBLE);
+                liveName.setText(bean.getTvName());
+            }
+            tips.setVisibility(View.VISIBLE);
         }
 
-        VideoBean bean=myAdapter.getItemData(playIndex);
-        if (bean!=null)
-            liveName.setText(bean.getTvName());
+        Handler handler=new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                tips.setVisibility(View.INVISIBLE);
+                liveName.setVisibility(View.INVISIBLE);
+            }
+        },3000);
+
 
         if (url != null) {
             mVideoView.pause();
@@ -284,6 +335,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             finish();
             return;
         }
+
+        mSettings.setLastVideoPath(url);
         mVideoView.start();
     }
 
@@ -339,7 +392,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_player, menu);
+//        getMenuInflater().inflate(R.menu.menu_player, menu);
         return true;
     }
 
