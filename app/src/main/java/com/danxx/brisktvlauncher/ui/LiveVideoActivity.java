@@ -312,6 +312,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
                     /**隐藏焦点**/
                     mRecyclerViewBridge2.setVisibleWidget(true);
+                    mRecyclerViewBridge.setVisibleWidget(true);
                 }
             }
 
