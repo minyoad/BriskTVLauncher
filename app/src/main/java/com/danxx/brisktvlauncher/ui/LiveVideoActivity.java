@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -57,14 +58,11 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     private HashMap<String,List> mChannelMap;
 
-    //    private AndroidMediaController mMediaController;
     private CustomMediaController customMediaController;
     private IjkVideoView mVideoView;
     private RecyclerViewTV videoList;
     private RecyclerViewTV videoList2;
-//    private TextView mToastTextView;
-//    private TableLayout mHudView;
-//    private DrawerLayout mDrawerLayout;
+
     private ViewGroup mRightDrawer;
     private TextView tips,liveName;
     /**播放指示器**/
@@ -82,22 +80,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     private Settings mSettings;
     private boolean mBackPressed;
     private List<VideoBean> datas = new ArrayList<>();
-//    private String []names = new String[]{
-//            "香港电影","综艺频道","高清音乐","动作电影","电影","周星驰","成龙","喜剧","儿歌","LIVE生活"
-//    };
-//
-//    private String []urls = new String[]{
-//            "http://live.gslb.letv.com/gslb?stream_id=lb_hkmovie_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
-//            "http://live.gslb.letv.com/gslb?stream_id=lb_ent_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
-//            "http://live.gslb.letv.com/gslb?stream_id=lb_music_1300&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=letv&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_dzdy_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_movie_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_zxc_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_cl_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_comedy_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_erge_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1",
-//            "http://live.gslb.letv.com/gslb?tag=live&stream_id=lb_livemusic_720p&tag=live&ext=m3u8&sign=live_tv&platid=10&splatid=1009&format=C1S&expect=1"
-//    };
+
     private long TV_CHANNEL_UPDATE_INTERVAL=30*60*1000;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle ,int index) {
@@ -127,52 +110,11 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         if(mVideoPath==null){
             mVideoPath=mSettings.getLastVideoPath();
+            if (mVideoPath==null){
+                mVideoPath=getDefaultChannel();
+            }
         }
 
-//        Intent intent = getIntent();
-//        String intentAction = intent.getAction();
-        /**取消对Intent的处理**/
-//        if (!TextUtils.isEmpty(intentAction)) {
-//            if (intentAction.equals(Intent.ACTION_VIEW)) {
-//                mVideoPath = intent.getDataString();
-//            } else if (intentAction.equals(Intent.ACTION_SEND)) {
-//                mVideoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-//                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-//                    String scheme = mVideoUri.getScheme();
-//                    if (TextUtils.isEmpty(scheme)) {
-//                        Log.e(TAG, "Null unknown ccheme\n");
-//                        finish();
-//                        return;
-//                    }
-//                    if (scheme.equals(ContentResolver.SCHEME_ANDROID_RESOURCE)) {
-//                        mVideoPath = mVideoUri.getPath();
-//                    } else if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {
-//                        Log.e(TAG, "Can not resolve content below Android-ICS\n");
-//                        finish();
-//                        return;
-//                    } else {
-//                        Log.e(TAG, "Unknown scheme " + scheme + "\n");
-//                        finish();
-//                        return;
-//                    }
-//                }
-//            }
-//        }
-
-//        if (!TextUtils.isEmpty(mVideoPath)) {
-//            new RecentMediaStorage(this).saveUrlAsync(mVideoPath);
-//        }
-
-//        customMediaController = new CustomMediaController(this, false);
-//        customMediaController.setVisibility(View.GONE);
-//        customMediaController.setSupportActionBar(actionBar);
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-
-//        mToastTextView = (TextView) findViewById(R.id.toast_text_view);
-//        mHudView = (TableLayout) findViewById(R.id.hud_view);
-//        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        mRightDrawer = (ViewGroup) findViewById(R.id.right_drawer);
-//        mDrawerLayout.setScrimColor(Color.TRANSPARENT);
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -180,10 +122,27 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         tips = (TextView) findViewById(R.id.tips);
         liveName = (TextView) findViewById(R.id.liveName);
         mVideoView = (IjkVideoView) findViewById(R.id.video_view);
-//        mVideoView.setMediaController(customMediaController);
-//        mVideoView.setHudView(mHudView);
+
         // prefer mVideoPath
         playVideo(mVideoPath ,playIndex);
+    }
+
+    public String getDefaultChannel(){
+        if(mChannelMap==null){
+            return "";
+        }
+
+        Iterator<String> keyIterator=mChannelMap.keySet().iterator();
+        if(keyIterator.hasNext()){
+            String cateName=keyIterator.next();
+            VideoBean videoBean= (VideoBean) mChannelMap.get(cateName).get(0);
+            if (videoBean!=null){
+                return videoBean.getTvUrl();
+            }
+        }
+
+        return "";
+
     }
     public void initTiemData()
     {
@@ -361,6 +320,11 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
             }
         });
+
+
+        if(mVideoPath.isEmpty()){
+            playVideo(getDefaultChannel(),0);
+        }
 
 
     }
