@@ -43,8 +43,8 @@ public class RecyclerViewTV extends RecyclerView {
 
 	@Override
 	protected int getChildDrawingOrder(int childCount, int i) {
-		Log.d("danxx" ,"childCount-->"+childCount);
-		Log.d("danxx" ,"i-->"+i);
+//		Log.d("danxx" ,"childCount-->"+childCount);
+//		Log.d("danxx" ,"i-->"+i);
 		return mWidgetTvViewBring.getChildDrawingOrder(childCount, i);
 	}
 

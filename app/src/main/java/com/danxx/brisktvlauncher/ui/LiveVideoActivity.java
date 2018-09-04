@@ -36,7 +36,6 @@ import com.open.androidtvwidget.view.MainUpView;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -82,6 +81,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     private List<VideoBean> datas = new ArrayList<>();
 
     private long TV_CHANNEL_UPDATE_INTERVAL=30*60*1000;
+    private String selectedCategory;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle ,int index) {
         Intent intent = new Intent(context, LiveVideoActivity.class);
@@ -240,15 +240,14 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 }
                 mRecyclerViewBridge.setFocusView(focusview, oldView, 1.1f);
                 oldView = focusview;
+
+                selectedCategory = myAdapter.getItemData(position);
             }
         });
 //        findViewById(R.id.videoContent).setOnFocusChangeListener(this);
 
-
-
         ArrayList catelist= new ArrayList();
         catelist.addAll(mChannelMap.keySet());
-
 
         myAdapter = new MyCategoryAdapter();
         myAdapter.setData(catelist);
@@ -271,6 +270,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         });
 
         mMainUpView2=new MainUpView(this);
+        mMainUpView2.attach2Window(this);
         mMainUpView2.setEffectBridge(new RecyclerViewBridge());
         mRecyclerViewBridge2 = (RecyclerViewBridge) mMainUpView2.getEffectBridge();
         mRecyclerViewBridge2.setUpRectResource(R.drawable.item_rectangle);
@@ -293,7 +293,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         videoList2.setLayoutManager(linearLayoutManager2);
         myAdapter2 = new MyAdapter();
-//        myAdapter2.setData(catelist);
         videoList2.setAdapter(myAdapter2);
         videoList2.setFocusable(false);
 //        myAdapter2.notifyDataSetChanged();
@@ -301,17 +300,15 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             @Override
             public void onItemClick(int position, Object data) {
                 String url = ((VideoBean)data).getTvUrl();
+
                 playVideo(url,position);
+
                 if(videoList2.getVisibility() == View.VISIBLE) {
                     videoList2.setVisibility(View.INVISIBLE);
                     videoList.setVisibility(View.INVISIBLE);
 
-//                    tips.setVisibility(View.VISIBLE);
-
-
-                    /**隐藏焦点**/
-                    mRecyclerViewBridge2.setVisibleWidget(true);
-                    mRecyclerViewBridge.setVisibleWidget(true);
+                    mRecyclerViewBridge2.setWidgetVisible(false);
+                    mRecyclerViewBridge.setWidgetVisible(false);
                 }
             }
 
@@ -325,9 +322,49 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         if(mVideoPath.isEmpty()){
             playVideo(getDefaultChannel(),0);
         }
+    }
+
+    private void setFocusMenu(RecyclerViewTV recyclerViewTV){
+        if (recyclerViewTV==null){
+
+            return;
+        }
+
+        if (recyclerViewTV==videoList){
+            showCateList(true);
+
+            if (videoList2.getVisibility()==View.VISIBLE){
+
+            }
+
+        }
+
+        if (recyclerViewTV==videoList2){
+            mRecyclerViewBridge.setWidgetVisible(false);
+
+
+        }
 
 
     }
+
+    private void showCateList(boolean visable){
+        if(visable){
+            if(videoList.getVisibility() != View.VISIBLE){
+                videoList.setVisibility(View.VISIBLE);
+                tips.setVisibility(View.INVISIBLE);
+                mRecyclerViewBridge.setWidgetVisible(true);
+                videoList.requestFocus();
+            }
+        }
+        else{
+            videoList.setVisibility(View.INVISIBLE);
+            tips.setVisibility(View.VISIBLE);
+            videoList.requestFocus();
+            mRecyclerViewBridge.setWidgetVisible(false);
+        }
+    }
+
 
     public void showChannelList(String cateName){
         videoList2.setVisibility(View.VISIBLE);
@@ -338,14 +375,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         myAdapter2.notifyDataSetChanged();
 
         videoList2.requestFocus();
-//        if(videoList2.getVisibility() == View.VISIBLE) {
-//            videoList2.setVisibility(View.INVISIBLE);
-////                    tips.setVisibility(View.VISIBLE);
-//
-//
-//            /**隐藏焦点**/
-//            mRecyclerViewBridge.setVisibleWidget(true);
-//        }
+        mRecyclerViewBridge.setWidgetVisible(false);
+        mRecyclerViewBridge2.setWidgetVisible(true);
+
     }
 
     /**
@@ -400,26 +432,64 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_DPAD_LEFT){
+            if(videoList2.getVisibility() == View.VISIBLE){
+                videoList.setVisibility(View.VISIBLE);
+                tips.setVisibility(View.INVISIBLE);
+                mRecyclerViewBridge.setWidgetVisible(true);
+                videoList.requestFocus();
+                return true;
+            }else {
+                showCateList(false);
+                return true;
+            }
+        }
+        else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
+
+            if(videoList.getVisibility() == View.VISIBLE){
+                showChannelList(selectedCategory);
+
+//                videoList.setVisibility(View.VISIBLE);
+//                tips.setVisibility(View.INVISIBLE);
+//                mRecyclerViewBridge.setWidgetVisible(true);
+//                videoList.requestFocus();
+                return true;
+            }
+
+        }
+
+        else
         if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
             if(videoList.getVisibility() != View.VISIBLE){
                 videoList.setVisibility(View.VISIBLE);
                 tips.setVisibility(View.INVISIBLE);
-                mRecyclerViewBridge.setVisibleWidget(false);
+                mRecyclerViewBridge.setWidgetVisible(true);
                 videoList.requestFocus();
+                return true;
+            }
+            else{
+                videoList2.setVisibility(View.VISIBLE);
+//                tips.setVisibility(View.VISIBLE);
+                videoList.setVisibility(View.INVISIBLE);
+                mRecyclerViewBridge.setWidgetVisible(false);
+                mRecyclerViewBridge2.setWidgetVisible(true);
+                return true;
             }
         }else if(KeyEvent.KEYCODE_BACK == keyCode){
             if(videoList2.getVisibility() == View.VISIBLE){
                 videoList2.setVisibility(View.INVISIBLE);
 //                tips.setVisibility(View.VISIBLE);
                 videoList.setVisibility(View.VISIBLE);
-                mRecyclerViewBridge.setVisibleWidget(true);
+                mRecyclerViewBridge.setWidgetVisible(true);
+                mRecyclerViewBridge2.setWidgetVisible(false);
+                videoList.requestFocus();
                 return true;
             }
             else if(videoList.getVisibility() == View.VISIBLE){
                 videoList.setVisibility(View.INVISIBLE);
                 tips.setVisibility(View.VISIBLE);
-                videoList.requestFocus();
-                mRecyclerViewBridge.setVisibleWidget(true);
+//                videoList.requestFocus();
+                mRecyclerViewBridge.setWidgetVisible(false);
                 return true;
             }
         }else if(KeyEvent.KEYCODE_MENU == keyCode){
@@ -427,7 +497,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 videoList.setVisibility(View.VISIBLE);
                 tips.setVisibility(View.INVISIBLE);
                 videoList.requestFocus();
-                mRecyclerViewBridge.setVisibleWidget(false);
+                mRecyclerViewBridge.setWidgetVisible(true);
+                return true;
             }
         }
         return super.onKeyDown(keyCode, event);
@@ -551,6 +622,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     public void onFocusChange(View v, boolean hasFocus) {
         mRecyclerViewBridge.setFocusView(v, oldView, 1.0f);
         oldView = v;
+
     }
 
     class MyAdapter extends BaseRecyclerViewAdapter<VideoBean> {

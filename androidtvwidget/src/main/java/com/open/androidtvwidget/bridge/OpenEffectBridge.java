@@ -77,13 +77,13 @@ public class OpenEffectBridge extends BaseEffectBridgeWrapper {
 	/**
 	 * 隐藏移动的边框.
 	 */
-	public void setVisibleWidget(boolean isHide) {
-		this.mIsHide = isHide;
+	public void setWidgetVisible(boolean isVisible) {
+		this.mIsHide = !isVisible;
 		getMainUpView().setVisibility(mIsHide ? View.INVISIBLE : View.VISIBLE);
 	}
 	
-	public boolean isVisibleWidget() {
-		return this.mIsHide;
+	public boolean isWidgetVisible() {
+		return !this.mIsHide;
 	}
 	
 	public interface NewAnimatorListener {
