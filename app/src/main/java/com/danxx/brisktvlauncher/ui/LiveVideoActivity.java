@@ -106,7 +106,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         // handle arguments
         mVideoPath = getIntent().getStringExtra("videoPath");
         playIndex = getIntent().getIntExtra("index",0);
-//        mVideoPath = urls[playIndex];
 
         if(mVideoPath==null){
             mVideoPath=mSettings.getLastVideoPath();
