@@ -48,4 +48,8 @@ public class RecyclerViewTV extends RecyclerView {
 		return mWidgetTvViewBring.getChildDrawingOrder(childCount, i);
 	}
 
+	public boolean isVisible(){
+		return getVisibility()==View.VISIBLE;
+	}
+
 }

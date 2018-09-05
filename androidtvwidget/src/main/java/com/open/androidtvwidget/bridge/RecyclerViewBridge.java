@@ -81,7 +81,7 @@ public class RecyclerViewBridge extends EffectNoDrawBridge {
 		mAnimatorSet.addListener(new AnimatorListener() {
 			@Override
 			public void onAnimationStart(Animator animation) {
-				if (isWidgetVisible()) {
+				if (isWidgetHide()) {
 					getMainUpView().setVisibility(View.GONE);
 				}
 				if (getNewAnimatorListener() != null)
@@ -94,7 +94,7 @@ public class RecyclerViewBridge extends EffectNoDrawBridge {
 
 			@Override
 			public void onAnimationEnd(Animator animation) {
-				getMainUpView().setVisibility(isWidgetVisible() ? View.GONE : View.VISIBLE);
+				getMainUpView().setVisibility(isWidgetHide() ? View.GONE : View.VISIBLE);
 				if (getNewAnimatorListener() != null)
 					getNewAnimatorListener().onAnimationEnd(RecyclerViewBridge.this, focusView, animation);
 			}

@@ -82,8 +82,8 @@ public class OpenEffectBridge extends BaseEffectBridgeWrapper {
 		getMainUpView().setVisibility(mIsHide ? View.INVISIBLE : View.VISIBLE);
 	}
 	
-	public boolean isWidgetVisible() {
-		return !this.mIsHide;
+	public boolean isWidgetHide() {
+		return this.mIsHide;
 	}
 	
 	public interface NewAnimatorListener {

@@ -110,7 +110,7 @@ public class EffectNoDrawBridge extends OpenEffectBridge {
 		mAnimatorSet.addListener(new AnimatorListener() {
 			@Override
 			public void onAnimationStart(Animator animation) {
-				if (isWidgetVisible()) {
+				if (isWidgetHide()) {
 					getMainUpView().setVisibility(View.GONE);
 				}
 				if (getNewAnimatorListener() != null)
@@ -123,7 +123,7 @@ public class EffectNoDrawBridge extends OpenEffectBridge {
 
 			@Override
 			public void onAnimationEnd(Animator animation) {
-				getMainUpView().setVisibility(isWidgetVisible() ? View.GONE : View.VISIBLE);
+				getMainUpView().setVisibility(isWidgetHide() ? View.GONE : View.VISIBLE);
 				if (getNewAnimatorListener() != null)
 					getNewAnimatorListener().onAnimationEnd(EffectNoDrawBridge.this, focusView, animation);
 
