@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.danxx.brisktvlauncher.R;
@@ -52,6 +53,10 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     private static final String TV_CHANNEL_LIST_URL = "http://ssvip.mybacc.com/tv.txt";
     private static final String LOCAL_TV_CHANNEL_FILE = "tv.txt";
 
+    private static final String LAST_SELECTED_CATEGORY = "LAST_SELECTED_CATEGORY";
+    private static final String LAST_SELECTED_CHANNEL_NAME = "LAST_SELECTED_CHANNEL_NAME";
+
+
     private String mVideoPath;
     private Uri mVideoUri;
 
@@ -83,6 +88,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     private long TV_CHANNEL_UPDATE_INTERVAL=30*60*1000;
     private String selectedCategory;
+    private ArrayList categoryList;
+    private TextView categoryView;
+    private LinearLayout categoryLayout;
 
     public static Intent newIntent(Context context, String videoPath, String videoTitle ,int index) {
         Intent intent = new Intent(context, LiveVideoActivity.class);
@@ -113,6 +121,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             if (mVideoPath==null){
                 mVideoPath=getDefaultChannel();
             }
+            selectedCategory=mSettings.getPrefs(LAST_SELECTED_CATEGORY);
         }
 
 
@@ -219,56 +228,13 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     }
 
     private void initVideoList(){
-        videoList = (RecyclerViewTV) findViewById(R.id.videoList);
+
+        categoryLayout = (LinearLayout)findViewById(R.id.layoutcategory);
+
+        categoryView = (TextView)findViewById(R.id.txt_category);
         videoList2 = (RecyclerViewTV) findViewById(R.id.videoList2);
-
-        mainUpView1 = (MainUpView) findViewById(R.id.mainUpView);
-        mainUpView1.setEffectBridge(new RecyclerViewBridge());
-        mRecyclerViewBridge = (RecyclerViewBridge) mainUpView1.getEffectBridge();
-        mRecyclerViewBridge.setUpRectResource(R.drawable.item_rectangle);
-        mRecyclerViewBridge.setTranDurAnimTime(200);
-        mRecyclerViewBridge.setShadowResource(R.drawable.item_shadow);
-
-        LinearLayoutManagerTV linearLayoutManager = new LinearLayoutManagerTV(LiveVideoActivity.this);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        videoList.setLayoutManager(linearLayoutManager);
-        linearLayoutManager.setOnChildSelectedListener(new OnChildSelectedListener() {
-            @Override
-            public void onChildSelected(RecyclerView parent, View focusview, int position, int dy) {
-                focusview.bringToFront();
-                if (oldView == null) {
-                    Log.d("danxx", "oldView == null");
-                }
-                mRecyclerViewBridge.setFocusView(focusview, oldView, 1.1f);
-                oldView = focusview;
-
-                selectedCategory = myAdapter.getItemData(position);
-            }
-        });
-//        findViewById(R.id.videoContent).setOnFocusChangeListener(this);
-
-        ArrayList catelist= new ArrayList();
-        catelist.addAll(mChannelMap.keySet());
-
-        myAdapter = new MyCategoryAdapter();
-        myAdapter.setData(catelist);
-        videoList.setAdapter(myAdapter);
-        videoList.setFocusable(false);
-        myAdapter.notifyDataSetChanged();
-        myAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position, Object data) {
-
-                String catename=data.toString();
-                showChannelList(catename);
-
-            }
-
-            @Override
-            public void onItemLongClick(int position, Object data) {
-
-            }
-        });
+        categoryList = new ArrayList();
+        categoryList.addAll(mChannelMap.keySet());
 
         mMainUpView2=new MainUpView(this);
         mMainUpView2.attach2Window(this);
@@ -295,8 +261,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         videoList2.setLayoutManager(linearLayoutManager2);
         myAdapter2 = new MyAdapter();
         videoList2.setAdapter(myAdapter2);
-        videoList2.setFocusable(false);
-//        myAdapter2.notifyDataSetChanged();
         myAdapter2.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, Object data) {
@@ -304,13 +268,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
                 playVideo(url,position);
 
-                if(videoList2.getVisibility() == View.VISIBLE) {
-                    videoList2.setVisibility(View.INVISIBLE);
-                    videoList.setVisibility(View.INVISIBLE);
+                showMenu(false);
 
-                    mRecyclerViewBridge2.setWidgetVisible(false);
-                    mRecyclerViewBridge.setWidgetVisible(false);
-                }
             }
 
             @Override
@@ -320,59 +279,60 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         });
 
 
+
         if(mVideoPath.isEmpty()){
+            selectedCategory=(String) categoryList.get(0);
             playVideo(getDefaultChannel(),0);
         }
-    }
-
-    private void setFocusMenu(RecyclerViewTV recyclerViewTV){
-        if (recyclerViewTV==null){
-
-            showCateList(false);
-            videoList2.setVisibility(View.INVISIBLE);
-
-            mRecyclerViewBridge.setWidgetVisible(false);
-            mRecyclerViewBridge2.setWidgetVisible(false);
-
-            return;
-        }
-
-        if (recyclerViewTV==videoList){
-            showCateList(true);
-
-            if (videoList2.getVisibility()==View.VISIBLE){
-                videoList2.setVisibility(View.INVISIBLE);
-                mRecyclerViewBridge2.setWidgetVisible(false);
-            }
-
-        }
-
-        if (recyclerViewTV==videoList2){
-            mRecyclerViewBridge.setWidgetVisible(false);
-            mRecyclerViewBridge2.setWidgetVisible(true);
-
-        }
-
-
-    }
-
-    private void showCateList(boolean visable){
-        if(visable){
-            videoList.setVisibility(View.VISIBLE);
-            tips.setVisibility(View.INVISIBLE);
-            mRecyclerViewBridge.setWidgetVisible(true);
-            videoList.requestFocus();
-        }
         else{
-            videoList.setVisibility(View.INVISIBLE);
-            tips.setVisibility(View.VISIBLE);
-//            videoList.requestFocus();
-            mRecyclerViewBridge.setWidgetVisible(false);
+//            selectedCategory=
         }
+    }
+
+    private void showMenu(final boolean visable){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(visable){
+                    if (selectedCategory!=null && !selectedCategory.isEmpty()){
+                        showChannelList(selectedCategory);
+                    }
+
+                    categoryLayout.setVisibility(View.VISIBLE);
+
+                    videoList2.setVisibility(View.VISIBLE);
+                    tips.setVisibility(View.INVISIBLE);
+                    mRecyclerViewBridge2.setWidgetVisible(true);
+                    videoList2.requestFocus();
+
+                    videoList2.scrollToPosition(0);
+                    myAdapter2.toggleSelection(0);
+
+                    View view= videoList2.getChildAt(0);
+                    if (view !=null){
+                    view.requestFocus();
+
+                    mRecyclerViewBridge2.setFocusView(view,1.1f);
+                    }
+                }
+                else{
+                    videoList2.setVisibility(View.INVISIBLE);
+                    tips.setVisibility(View.VISIBLE);
+                    mRecyclerViewBridge2.setWidgetVisible(false);
+                    categoryLayout.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
     }
 
 
     public void showChannelList(String cateName){
+
+        categoryView.setText(cateName);
+
+        selectedCategory=cateName;
+
         videoList2.setVisibility(View.VISIBLE);
 
         List channelList=mChannelMap.get(cateName);
@@ -381,7 +341,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         myAdapter2.notifyDataSetChanged();
 
         videoList2.requestFocus();
-        mRecyclerViewBridge.setWidgetVisible(false);
+//        mRecyclerViewBridge.setWidgetVisible(false);
         mRecyclerViewBridge2.setWidgetVisible(true);
 
     }
@@ -400,6 +360,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             if (bean!=null) {
                 liveName.setVisibility(View.VISIBLE);
                 liveName.setText(bean.getTvName());
+                mSettings.setPrefs(LAST_SELECTED_CHANNEL_NAME,bean.getTvName());
             }
             tips.setVisibility(View.VISIBLE);
         }
@@ -426,6 +387,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         }
 
         mSettings.setLastVideoPath(url);
+        mSettings.setPrefs(LAST_SELECTED_CATEGORY,selectedCategory);
+
         mVideoView.start();
     }
 
@@ -436,78 +399,125 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         super.onBackPressed();
     }
 
+    private void showPreviousCategory(){
+        int index = categoryList.indexOf(selectedCategory);
+        String newCategory = "";
+        if (index > 0) {
+            newCategory = (String) categoryList.get(index - 1);
+        } else {
+            newCategory = (String) categoryList.get(0);
+        }
+
+        showChannelList(newCategory);
+    }
+
+    private void showNextCategory(){
+        int index = categoryList.indexOf(selectedCategory);
+        String newCategory = "";
+        if (index < categoryList.size()-1) {
+            newCategory = (String) categoryList.get(index +1);
+        } else {
+            newCategory = (String) categoryList.get(0);
+        }
+
+        showChannelList(newCategory);
+    }
+
+
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode==KeyEvent.KEYCODE_DPAD_LEFT){
-            if(videoList2.isVisible()){
-                videoList2.setVisibility(View.INVISIBLE);
-                mRecyclerViewBridge2.setWidgetVisible(false);
-
-                videoList.setVisibility(View.VISIBLE);
-                tips.setVisibility(View.INVISIBLE);
-                mRecyclerViewBridge.setWidgetVisible(true);
-                videoList.requestFocus();
-
-            }else if(videoList.isVisible()){
-                showCateList(false);
-                mRecyclerViewBridge.setWidgetVisible(false);
-
-            }else{
-                showCateList(true);
+            if(videoList2.isVisible()) {
+                showPreviousCategory();
             }
+            else{
+                showMenu(true);
+            }
+
+
+//                videoList2.setVisibility(View.INVISIBLE);
+//                mRecyclerViewBridge2.setWidgetVisible(false);
+//
+//                videoList.setVisibility(View.VISIBLE);
+//                tips.setVisibility(View.INVISIBLE);
+//                mRecyclerViewBridge.setWidgetVisible(true);
+//                videoList.requestFocus();
+
+//            }
             return true;
         }
         else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
 
-            if(videoList.isVisible()){
-                showChannelList(selectedCategory);
-                return true;
+            if(videoList2.isVisible()) {
+                showNextCategory();
             }
+            return true;
+//            if(videoList.isVisible()){
+//                showChannelList(selectedCategory);
+//                return true;
+//            }
 
         }
 
         else
         if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
-            if(videoList.getVisibility() != View.VISIBLE){
-                videoList.setVisibility(View.VISIBLE);
-                tips.setVisibility(View.INVISIBLE);
-                mRecyclerViewBridge.setWidgetVisible(true);
-                videoList.requestFocus();
-                return true;
+
+            if (!videoList2.isVisible()){
+                showMenu(true);
             }
-            else{
-                videoList2.setVisibility(View.VISIBLE);
-//                tips.setVisibility(View.VISIBLE);
-                videoList.setVisibility(View.INVISIBLE);
-                mRecyclerViewBridge.setWidgetVisible(false);
-                mRecyclerViewBridge2.setWidgetVisible(true);
-                return true;
-            }
-        }else if(KeyEvent.KEYCODE_BACK == keyCode){
-            if(videoList2.getVisibility() == View.VISIBLE){
-                videoList2.setVisibility(View.INVISIBLE);
-//                tips.setVisibility(View.VISIBLE);
-                videoList.setVisibility(View.VISIBLE);
-                mRecyclerViewBridge.setWidgetVisible(true);
-                mRecyclerViewBridge2.setWidgetVisible(false);
-                videoList.requestFocus();
-                return true;
-            }
-            else if(videoList.getVisibility() == View.VISIBLE){
-                videoList.setVisibility(View.INVISIBLE);
-                tips.setVisibility(View.VISIBLE);
+            return true;
+
+//            if(videoList.getVisibility() != View.VISIBLE){
+//                videoList.setVisibility(View.VISIBLE);
+//                tips.setVisibility(View.INVISIBLE);
+//                mRecyclerViewBridge.setWidgetVisible(true);
 //                videoList.requestFocus();
-                mRecyclerViewBridge.setWidgetVisible(false);
-                return true;
+//                return true;
+//            }
+//            else{
+//                videoList2.setVisibility(View.VISIBLE);
+////                tips.setVisibility(View.VISIBLE);
+//                videoList.setVisibility(View.INVISIBLE);
+//                mRecyclerViewBridge.setWidgetVisible(false);
+//                mRecyclerViewBridge2.setWidgetVisible(true);
+//                return true;
+//            }
+        }else if(KeyEvent.KEYCODE_BACK == keyCode){
+
+            if (videoList2.isVisible()){
+                showMenu(false);
             }
+            return true;
+
+//            if(videoList2.getVisibility() == View.VISIBLE){
+//                videoList2.setVisibility(View.INVISIBLE);
+////                tips.setVisibility(View.VISIBLE);
+//                videoList.setVisibility(View.VISIBLE);
+//                mRecyclerViewBridge.setWidgetVisible(true);
+//                mRecyclerViewBridge2.setWidgetVisible(false);
+//                videoList.requestFocus();
+//                return true;
+//            }
+//            else if(videoList.getVisibility() == View.VISIBLE){
+//                videoList.setVisibility(View.INVISIBLE);
+//                tips.setVisibility(View.VISIBLE);
+////                videoList.requestFocus();
+//                mRecyclerViewBridge.setWidgetVisible(false);
+//                return true;
+//            }
         }else if(KeyEvent.KEYCODE_MENU == keyCode){
-            if(videoList.getVisibility() != View.VISIBLE){
-                videoList.setVisibility(View.VISIBLE);
-                tips.setVisibility(View.INVISIBLE);
-                videoList.requestFocus();
-                mRecyclerViewBridge.setWidgetVisible(true);
-                return true;
-            }
+
+            showMenu(!videoList2.isVisible());
+            return true;
+
+//            if(videoList.getVisibility() != View.VISIBLE){
+//                videoList.setVisibility(View.VISIBLE);
+//                tips.setVisibility(View.INVISIBLE);
+//                videoList.requestFocus();
+//                mRecyclerViewBridge.setWidgetVisible(true);
+//                return true;
+//            }
         }
         return super.onKeyDown(keyCode, event);
     }
