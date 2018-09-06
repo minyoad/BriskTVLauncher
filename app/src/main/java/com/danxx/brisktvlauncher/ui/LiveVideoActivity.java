@@ -294,25 +294,26 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             @Override
             public void run() {
                 if(visable){
-                    if (selectedCategory!=null && !selectedCategory.isEmpty()){
-                        showChannelList(selectedCategory);
+
+                    if (selectedCategory==null ||selectedCategory.isEmpty()){
+                        selectedCategory=(String) categoryList.get(0);
                     }
-
+                    showChannelList(selectedCategory);
                     categoryLayout.setVisibility(View.VISIBLE);
-
-                    videoList2.setVisibility(View.VISIBLE);
-                    tips.setVisibility(View.INVISIBLE);
-                    mRecyclerViewBridge2.setWidgetVisible(true);
-                    videoList2.requestFocus();
+//
+//                    videoList2.setVisibility(View.VISIBLE);
+//                    tips.setVisibility(View.INVISIBLE);
+//                    mRecyclerViewBridge2.setWidgetVisible(true);
+//                    videoList2.requestFocus();
 
                     videoList2.scrollToPosition(0);
                     myAdapter2.toggleSelection(0);
 
                     View view= videoList2.getChildAt(0);
                     if (view !=null){
-                    view.requestFocus();
+                        view.requestFocus();
 
-                    mRecyclerViewBridge2.setFocusView(view,1.1f);
+                        mRecyclerViewBridge2.setFocusView(view,1.1f);
                     }
                 }
                 else{
@@ -329,6 +330,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     public void showChannelList(String cateName){
 
+        mRecyclerViewBridge2.setUnFocusView(oldView2);
+        mRecyclerViewBridge2.setWidgetVisible(false);
+
         categoryView.setText(cateName);
 
         selectedCategory=cateName;
@@ -341,7 +345,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         myAdapter2.notifyDataSetChanged();
 
         videoList2.requestFocus();
-//        mRecyclerViewBridge.setWidgetVisible(false);
         mRecyclerViewBridge2.setWidgetVisible(true);
 
     }
@@ -435,16 +438,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 showMenu(true);
             }
 
-
-//                videoList2.setVisibility(View.INVISIBLE);
-//                mRecyclerViewBridge2.setWidgetVisible(false);
-//
-//                videoList.setVisibility(View.VISIBLE);
-//                tips.setVisibility(View.INVISIBLE);
-//                mRecyclerViewBridge.setWidgetVisible(true);
-//                videoList.requestFocus();
-
-//            }
             return true;
         }
         else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
@@ -453,11 +446,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 showNextCategory();
             }
             return true;
-//            if(videoList.isVisible()){
-//                showChannelList(selectedCategory);
-//                return true;
-//            }
-
         }
 
         else
@@ -468,21 +456,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
             return true;
 
-//            if(videoList.getVisibility() != View.VISIBLE){
-//                videoList.setVisibility(View.VISIBLE);
-//                tips.setVisibility(View.INVISIBLE);
-//                mRecyclerViewBridge.setWidgetVisible(true);
-//                videoList.requestFocus();
-//                return true;
-//            }
-//            else{
-//                videoList2.setVisibility(View.VISIBLE);
-////                tips.setVisibility(View.VISIBLE);
-//                videoList.setVisibility(View.INVISIBLE);
-//                mRecyclerViewBridge.setWidgetVisible(false);
-//                mRecyclerViewBridge2.setWidgetVisible(true);
-//                return true;
-//            }
         }else if(KeyEvent.KEYCODE_BACK == keyCode){
 
             if (videoList2.isVisible()){
@@ -490,34 +463,11 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
             return true;
 
-//            if(videoList2.getVisibility() == View.VISIBLE){
-//                videoList2.setVisibility(View.INVISIBLE);
-////                tips.setVisibility(View.VISIBLE);
-//                videoList.setVisibility(View.VISIBLE);
-//                mRecyclerViewBridge.setWidgetVisible(true);
-//                mRecyclerViewBridge2.setWidgetVisible(false);
-//                videoList.requestFocus();
-//                return true;
-//            }
-//            else if(videoList.getVisibility() == View.VISIBLE){
-//                videoList.setVisibility(View.INVISIBLE);
-//                tips.setVisibility(View.VISIBLE);
-////                videoList.requestFocus();
-//                mRecyclerViewBridge.setWidgetVisible(false);
-//                return true;
-//            }
         }else if(KeyEvent.KEYCODE_MENU == keyCode){
 
             showMenu(!videoList2.isVisible());
             return true;
 
-//            if(videoList.getVisibility() != View.VISIBLE){
-//                videoList.setVisibility(View.VISIBLE);
-//                tips.setVisibility(View.INVISIBLE);
-//                videoList.requestFocus();
-//                mRecyclerViewBridge.setWidgetVisible(true);
-//                return true;
-//            }
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -638,8 +588,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
      */
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-//        mRecyclerViewBridge.setFocusView(v, oldView, 1.0f);
-//        oldView = v;
+//        mRecyclerViewBridge2.setFocusView(v, oldView2, 1.0f);
+//        oldView2 = v;
 
     }
 
@@ -669,6 +619,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
         }
     }
+
     class MyCategoryAdapter extends BaseRecyclerViewAdapter<String> {
 
         @Override
