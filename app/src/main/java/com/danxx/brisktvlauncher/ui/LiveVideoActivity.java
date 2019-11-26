@@ -25,6 +25,7 @@ import com.danxx.brisktvlauncher.adapter.BaseRecyclerViewHolder;
 import com.danxx.brisktvlauncher.model.VideoBean;
 import com.danxx.brisktvlauncher.module.Settings;
 import com.danxx.brisktvlauncher.utils.FileUtils;
+import com.danxx.brisktvlauncher.utils.SimpleM3UParser;
 import com.danxx.brisktvlauncher.widget.media.CustomMediaController;
 import com.danxx.brisktvlauncher.widget.media.IjkVideoView;
 import com.danxx.brisktvlauncher.widget.media.MeasureHelper;
@@ -35,6 +36,7 @@ import com.open.androidtvwidget.recycle.RecyclerViewTV;
 import com.open.androidtvwidget.view.MainUpView;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -49,8 +51,8 @@ import tv.danmaku.ijk.media.player.misc.ITrackInfo;
  */
 public class LiveVideoActivity extends AppCompatActivity implements TracksFragment.ITrackHolder ,View.OnFocusChangeListener {
     private static final String TAG = "LiveVideoActivity";
-    private static final String TV_CHANNEL_LIST_URL = "http://ssvip.mybacc.com/tv.txt";
-    private static final String LOCAL_TV_CHANNEL_FILE = "tv.txt";
+    private static final String TV_CHANNEL_LIST_URL = "https://www.mybacc.com/tv.m3u";
+    private static final String LOCAL_TV_CHANNEL_FILE = "tv.m3u";
 
     private String mVideoPath;
     private Uri mVideoUri;
@@ -115,6 +117,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
         }
 
+        mVideoPath="http://39.135.36.153:18890/000000001000/1000000001000009115/1.m3u8?channel-id=ystenlive&Contentid=1000000001000009115&livemode=1&stbId=005203FF000360100001001A34C0CD33&userToken=bd8bb70bdb2b54bd84b587dffa024f7621vv&usergroup=g21077200000&version=1.0&owaccmark=1000000001000009115&owchid=ystenlive&owsid=1106497909461209970&AuthInfo=yOLXJswzZFfV3FvB8MhHuElKGJKLbU5H0jB3qAhfSE7AORAoVDZDWbFnJ0sXJEaRJ1HPTMtmQf%2bVwcp8RojByB2Rhtn7waHVWUQ9gcJ0mHLEp3xuYtoWp3K%2bdNVn%2bMR4";
 
         // init player
         IjkMediaPlayer.loadLibrariesOnce(null);
@@ -150,59 +153,91 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             @Override
             public void run() {
 
-                List<String> videoList=null;
+                List<SimpleM3UParser.M3U_Entry> videoList=null;
                 File tvChannel = new File(LiveVideoActivity.this.getFilesDir(), LOCAL_TV_CHANNEL_FILE);
-                if(tvChannel.exists()){
-                    String content=FileUtils.read(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE);
+//                if(tvChannel.exists()){
+//                    String content=FileUtils.read(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE);
+//
+//                    String[] videolist=content.split("\r\n");
+//                    videoList= new ArrayList<>();
+//                    for(SimpleM3UParser.M3U_Entry video:videolist){
+//                        videoList.add(video);
+//                    }
+//                }
 
-                    String[] videolist=content.split("\r\n");
-                    videoList= new ArrayList<>();
-                    for(String video:videolist){
-                        videoList.add(video);
+                if (!tvChannel.exists() || mSettings.getChannelUpdate().getTime()-(new Date().getTime())>TV_CHANNEL_UPDATE_INTERVAL){ //30min update from server
+                    String m3uContent= FileUtils.readFileFromUrl(TV_CHANNEL_LIST_URL);
+
+                    try {
+                        FileUtils.write(tvChannel,m3uContent);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
 
+                    mSettings.setChannelUpdate(new Date());
+
+//                    String content= TextUtils.join("\r\n",videoList);
+//                    if(videoList!=null && videoList.size()>0) {
+//                        FileUtils.write(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE,content);
+//
+//                        mSettings.setChannelUpdate(new Date());
+//                    }
                 }
 
-                if (!tvChannel.exists() || videoList.size()==0 || mSettings.getChannelUpdate().getTime()-(new Date().getTime())>TV_CHANNEL_UPDATE_INTERVAL){ //30min update from server
-                    videoList= FileUtils.readFileFromUrl(TV_CHANNEL_LIST_URL);
-                    String content= TextUtils.join("\r\n",videoList);
-                    if(videoList!=null && videoList.size()>0) {
-                        FileUtils.write(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE,content);
+                SimpleM3UParser parser=new SimpleM3UParser();
+                try {
+                    videoList=parser.parse(tvChannel.getAbsolutePath());
 
-                        mSettings.setChannelUpdate(new Date());
-                    }
-
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
 
-                String cateName="";
+//                String cateName="";
 
                 mChannelMap=new HashMap<>();
-                for (String line:videoList){
-                    if (line.contains(",")){
-                        String[] content=line.split(",");
-                        VideoBean videoBean = new VideoBean();
-                        videoBean.setTvName(content[0]);
-                        videoBean.setTvUrl(content[1]);
-                        datas.add(videoBean);
-                    }
-                    else{
-                        if (datas.size()==0){
-                            cateName=line;
-                        }
-                        else{
-                            List list=mChannelMap.get(cateName);
-                            if(list!=null){
-                                datas.addAll(list);
-                            }
 
-                            mChannelMap.put(cateName,datas);
-                            datas=new ArrayList<>();
-                            cateName=line;
-                        }
-
+                for(SimpleM3UParser.M3U_Entry entry:videoList){
+                    List<VideoBean> list=mChannelMap.get(entry.getGroupTitle());
+                    if(list==null){
+                        list=new ArrayList<>();
+                        mChannelMap.put(entry.getGroupTitle(),list);
                     }
+
+                    VideoBean videoBean = new VideoBean();
+                    videoBean.setTvName(entry.getName());
+                    videoBean.setTvUrl(entry.getUrl());
+
+                    list.add(videoBean);
+
                 }
+
+
+//                for (String line:videoList){
+//                    if (line.contains(",")){
+//                        String[] content=line.split(",");
+//                        VideoBean videoBean = new VideoBean();
+//                        videoBean.setTvName(content[0]);
+//                        videoBean.setTvUrl(content[1]);
+//                        datas.add(videoBean);
+//                    }
+//                    else{
+//                        if (datas.size()==0){
+//                            cateName=line;
+//                        }
+//                        else{
+//                            List list=mChannelMap.get(cateName);
+//                            if(list!=null){
+//                                datas.addAll(list);
+//                            }
+//
+//                            mChannelMap.put(cateName,datas);
+//                            datas=new ArrayList<>();
+//                            cateName=line;
+//                        }
+//
+//                    }
+//                }
 
                 runOnUiThread(new Runnable() {
                                   @Override
@@ -456,18 +491,14 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 showCateList(true);
             }
             return true;
-        }
-        else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
+        }else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
 
             if(videoList.isVisible()){
                 showChannelList(selectedCategory);
                 return true;
             }
 
-        }
-
-        else
-        if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
+        } else  if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode ){
             if(videoList.getVisibility() != View.VISIBLE){
                 videoList.setVisibility(View.VISIBLE);
                 tips.setVisibility(View.INVISIBLE);

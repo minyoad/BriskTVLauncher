@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -34,12 +36,21 @@ import java.util.List;
  * 读取文件工具类
  */
 public class FileUtils {
-    private final static String TAG = "FileUitl------读取文件工具类";
+    private final static String TAG = "FileUitls";
 
     private static String path = "/sdcard/GMYZ/log/";
 
     private static String padFilePath = "/sdcard/driver.ini";
 
+    public static void write(File outputFile,String content) throws IOException {
+        FileOutputStream fost = new FileOutputStream(outputFile, true);
+        BufferedWriter myo =new BufferedWriter(new OutputStreamWriter(fost, "UTF-8"));
+        myo.write(content);
+
+        myo.flush();
+        myo.close();
+
+    }
     /**
      * 写文本文件 在Android系统中，文件保存在 /data/data/PACKAGE_NAME/files 目录下
      *
@@ -50,8 +61,7 @@ public class FileUtils {
             content = "";
 
         try {
-            FileOutputStream fos = context.openFileOutput(fileName,
-                    Context.MODE_PRIVATE);
+            FileOutputStream fos = context.openFileOutput(fileName,Context.MODE_PRIVATE);
             fos.write(content.getBytes());
 
             fos.close();
@@ -60,31 +70,33 @@ public class FileUtils {
         }
     }
 
-    public static List<String> readFileFromUrl(String url){
+    public static String readFileFromUrl(String url){
         URL mUrl = null;
-        List<String> csvLine = new ArrayList<>();
-        String[] content = null;
+//        List<String> csvLine = new ArrayList<>();
         try {
             mUrl = new URL(url);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+        StringBuffer sb=new StringBuffer();
+
         try {
             assert mUrl != null;
             URLConnection connection = mUrl.openConnection();
             BufferedReader br = new BufferedReader(new
                     InputStreamReader(connection.getInputStream()));
-            String line = "";
+            String line = null;
             while((line = br.readLine()) != null){
-                csvLine.add(line);
-//                content = line.split(",");
-//                csvLine.add(content);
+                sb.append(line);
+                sb.append("\r\n");
+//                csvLine.add(line);
             }
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return csvLine;
+        return sb.toString();
+//        return csvLine;
     }
 
 
