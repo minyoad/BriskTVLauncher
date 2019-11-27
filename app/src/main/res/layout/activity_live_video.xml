@@ -25,6 +25,95 @@
             android:paddingRight="@dimen/d_20dp">
         </FrameLayout>-->
 
+    <LinearLayout
+        android:id="@+id/layoutMenu"
+        android:layout_width="499dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="left"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layoutcategory"
+                android:layout_width="@dimen/d_320dp"
+                android:layout_height="@dimen/s_60sp"
+                android:background="#000000"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="@dimen/s_20sp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="start"
+                    android:text="@string/left"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    tools:ignore="HardcodedText" />
+
+                <TextView
+                    android:id="@+id/txt_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:textColor="#FFFFFF"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:layout_width="@dimen/s_20sp"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:text="@string/right"
+                    android:textColor="#FFFFFF"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    tools:ignore="HardcodedText" />
+
+            </LinearLayout>
+
+            <com.open.androidtvwidget.recycle.RecyclerViewTV
+                android:id="@+id/categorylist"
+                android:layout_width="@dimen/d_320dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="left"
+                android:background="#000000"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:focusable="false"
+                android:paddingLeft="@dimen/d_40dp"
+                android:paddingTop="@dimen/d_40dp"
+                android:paddingRight="@dimen/d_30dp"
+                android:paddingBottom="@dimen/d_40dp"
+                android:visibility="visible">
+
+            </com.open.androidtvwidget.recycle.RecyclerViewTV>
+
+        </LinearLayout>
+
+        <com.open.androidtvwidget.recycle.RecyclerViewTV
+            android:id="@+id/channellist"
+            android:layout_width="257dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:background="#000000"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:focusable="false"
+            android:paddingLeft="@dimen/d_40dp"
+            android:paddingTop="@dimen/d_40dp"
+            android:paddingRight="@dimen/d_30dp"
+            android:paddingBottom="@dimen/d_40dp"
+            android:visibility="visible">
+
+        </com.open.androidtvwidget.recycle.RecyclerViewTV>
+
+    </LinearLayout>
+
     <com.danxx.brisktvlauncher.widget.media.IjkVideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
@@ -66,75 +155,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
-        android:layout_marginBottom="@dimen/d_30dp"
         android:layout_marginLeft="@dimen/d_40dp"
+        android:layout_marginBottom="@dimen/d_30dp"
         android:focusable="false"
         android:text="按'菜单'键换台"
         android:textColor="@color/white"
-        android:textSize="@dimen/s_18sp" />
-
-    <LinearLayout
-        android:layout_width="@dimen/d_640dp"
-        android:layout_height="match_parent"
-        android:gravity="left"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:id="@+id/layoutcategory"
-            android:layout_width="@dimen/d_320dp"
-            android:layout_height="@dimen/s_60sp"
-            android:background="#000000"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:visibility="invisible">
-
-            <TextView
-                android:layout_width="@dimen/s_20sp"
-                android:layout_height="match_parent"
-                android:layout_gravity="start"
-                android:text="@string/left"
-                android:textColor="#FFFFFF"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                tools:ignore="HardcodedText" />
-
-            <TextView
-                android:id="@+id/txt_category"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp" />
-
-            <TextView
-                android:layout_width="@dimen/s_20sp"
-                android:layout_height="match_parent"
-                android:layout_gravity="end"
-                android:text="@string/right"
-                android:textColor="#FFFFFF"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                tools:ignore="HardcodedText" />
-
-        </LinearLayout>
-
-        <com.open.androidtvwidget.recycle.RecyclerViewTV
-            android:id="@+id/videoList2"
-            android:layout_width="@dimen/d_320dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="left"
-            android:background="#000000"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="false"
-            android:paddingBottom="@dimen/d_40dp"
-            android:paddingLeft="@dimen/d_40dp"
-            android:paddingRight="@dimen/d_30dp"
-            android:paddingTop="@dimen/d_40dp"
-            android:visibility="invisible">
-
-        </com.open.androidtvwidget.recycle.RecyclerViewTV>
-
-    </LinearLayout>
+        android:textSize="@dimen/s_18sp"
+        android:visibility="gone" />
 
 </FrameLayout>

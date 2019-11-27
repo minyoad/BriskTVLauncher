@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -66,22 +67,24 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     private CustomMediaController customMediaController;
     private IjkVideoView mVideoView;
-    private RecyclerViewTV videoList;
+    private RecyclerViewTV videoList1;
     private RecyclerViewTV videoList2;
 
     private ViewGroup mRightDrawer;
     private TextView tips,liveName;
     /**播放指示器**/
     private int playIndex = 0;
-    private View oldView;
+    private View oldView1;
     private View oldView2;
     MyCategoryAdapter myAdapter;
     MyAdapter myAdapter2;
 
-    MainUpView mainUpView1;
+    MainUpView mMainUpView1;
     MainUpView mMainUpView2;
-    RecyclerViewBridge mRecyclerViewBridge;
+    RecyclerViewBridge mRecyclerViewBridge1;
     RecyclerViewBridge mRecyclerViewBridge2;
+
+    private LinearLayout layoutMenu;
 
 
     private Settings mSettings;
@@ -164,15 +167,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
                 List<SimpleM3UParser.M3U_Entry> videoList=null;
                 File tvChannel = new File(LiveVideoActivity.this.getFilesDir(), LOCAL_TV_CHANNEL_FILE);
-//                if(tvChannel.exists()){
-//                    String content=FileUtils.read(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE);
-//
-//                    String[] videolist=content.split("\r\n");
-//                    videoList= new ArrayList<>();
-//                    for(SimpleM3UParser.M3U_Entry video:videolist){
-//                        videoList.add(video);
-//                    }
-//                }
 
                 if (!tvChannel.exists() || mSettings.getChannelUpdate().getTime()-(new Date().getTime())>TV_CHANNEL_UPDATE_INTERVAL){ //30min update from server
                     String m3uContent= FileUtils.readFileFromUrl(TV_CHANNEL_LIST_URL);
@@ -185,12 +179,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
                     mSettings.setChannelUpdate(new Date());
 
-//                    String content= TextUtils.join("\r\n",videoList);
-//                    if(videoList!=null && videoList.size()>0) {
-//                        FileUtils.write(LiveVideoActivity.this, LOCAL_TV_CHANNEL_FILE,content);
-//
-//                        mSettings.setChannelUpdate(new Date());
-//                    }
                 }
 
                 SimpleM3UParser parser=new SimpleM3UParser();
@@ -200,9 +188,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
-//                String cateName="";
 
                 mChannelMap=new HashMap<>();
 
@@ -221,33 +206,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
                 }
 
-
-//                for (String line:videoList){
-//                    if (line.contains(",")){
-//                        String[] content=line.split(",");
-//                        VideoBean videoBean = new VideoBean();
-//                        videoBean.setTvName(content[0]);
-//                        videoBean.setTvUrl(content[1]);
-//                        datas.add(videoBean);
-//                    }
-//                    else{
-//                        if (datas.size()==0){
-//                            cateName=line;
-//                        }
-//                        else{
-//                            List list=mChannelMap.get(cateName);
-//                            if(list!=null){
-//                                datas.addAll(list);
-//                            }
-//
-//                            mChannelMap.put(cateName,datas);
-//                            datas=new ArrayList<>();
-//                            cateName=line;
-//                        }
-//
-//                    }
-//                }
-
                 runOnUiThread(new Runnable() {
                                   @Override
                                   public void run() {
@@ -264,12 +222,57 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     private void initVideoList(){
 
+        layoutMenu=(LinearLayout)findViewById(R.id.layoutMenu);
+        layoutMenu.setVisibility(View.INVISIBLE);
+
         categoryLayout = (LinearLayout)findViewById(R.id.layoutcategory);
 
         categoryView = (TextView)findViewById(R.id.txt_category);
-        videoList2 = (RecyclerViewTV) findViewById(R.id.videoList2);
         categoryList = new ArrayList();
         categoryList.addAll(mChannelMap.keySet());
+        videoList1=(RecyclerViewTV)findViewById(R.id.categorylist);
+
+        myAdapter=new MyCategoryAdapter();
+        myAdapter.setData(categoryList);
+        myAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(int position, Object data) {
+
+            }
+
+            @Override
+            public void onItemLongClick(int position, Object data) {
+
+            }
+        });
+
+        mMainUpView1=new MainUpView(this);
+        mMainUpView1.attach2Window(this);
+        mMainUpView1.setEffectBridge(new RecyclerViewBridge());
+        mRecyclerViewBridge1 = (RecyclerViewBridge) mMainUpView1.getEffectBridge();
+        mRecyclerViewBridge1.setUpRectResource(R.drawable.item_rectangle);
+        mRecyclerViewBridge1.setTranDurAnimTime(200);
+        mRecyclerViewBridge1.setShadowResource(R.drawable.item_shadow);
+
+        LinearLayoutManagerTV linearLayoutManager1 = new LinearLayoutManagerTV(LiveVideoActivity.this);
+        linearLayoutManager1.setOrientation(LinearLayoutManager.VERTICAL);
+        linearLayoutManager1.setOnChildSelectedListener(new OnChildSelectedListener() {
+            @Override
+            public void onChildSelected(RecyclerView parent, View focusview, int position, int dy) {
+                focusview.bringToFront();
+                if (oldView1 == null) {
+                    Log.d("danxx", "oldView == null");
+                }
+                mRecyclerViewBridge1.setFocusView(focusview, oldView1, 1.1f);
+                oldView1 = focusview;
+            }
+        });
+
+        videoList1.setLayoutManager(linearLayoutManager1);
+
+
+        videoList2 = (RecyclerViewTV) findViewById(R.id.channellist);
 
         mMainUpView2=new MainUpView(this);
         mMainUpView2.attach2Window(this);
@@ -300,11 +303,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             @Override
             public void onItemClick(int position, Object data) {
                 String url = ((VideoBean)data).getTvUrl();
-
                 playVideo(url,position);
-
                 showMenu(false);
-
             }
 
             @Override
@@ -312,8 +312,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
             }
         });
-
-
 
         if(mVideoPath.isEmpty()){
             selectedCategory=(String) categoryList.get(0);
@@ -328,35 +326,31 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if(visable){
+                layoutMenu.setVisibility(visable?View.VISIBLE:View.INVISIBLE);
 
-                    if (selectedCategory==null ||selectedCategory.isEmpty()){
-                        selectedCategory=(String) categoryList.get(0);
-                    }
-                    showChannelList(selectedCategory);
-                    categoryLayout.setVisibility(View.VISIBLE);
+//                if(visable){
 //
-//                    videoList2.setVisibility(View.VISIBLE);
-//                    tips.setVisibility(View.INVISIBLE);
-//                    mRecyclerViewBridge2.setWidgetVisible(true);
-//                    videoList2.requestFocus();
-
-                    videoList2.scrollToPosition(0);
-                    myAdapter2.toggleSelection(0);
-
-                    View view= videoList2.getChildAt(0);
-                    if (view !=null){
-                        view.requestFocus();
-
-                        mRecyclerViewBridge2.setFocusView(view,1.1f);
-                    }
-                }
-                else{
-                    videoList2.setVisibility(View.INVISIBLE);
-                    tips.setVisibility(View.VISIBLE);
-                    mRecyclerViewBridge2.setWidgetVisible(false);
-                    categoryLayout.setVisibility(View.INVISIBLE);
-                }
+//                    if (selectedCategory==null ||selectedCategory.isEmpty()){
+//                        selectedCategory=(String) categoryList.get(0);
+//                    }
+//                    showChannelList(selectedCategory);
+//                    categoryLayout.setVisibility(View.VISIBLE);
+//
+//                    videoList2.scrollToPosition(0);
+//                    myAdapter2.toggleSelection(0);
+//
+//                    View view= videoList2.getChildAt(0);
+//                    if (view !=null){
+//                        view.requestFocus();
+//                        mRecyclerViewBridge2.setFocusView(view,1.1f);
+//                    }
+//                }
+//                else{
+//                    videoList2.setVisibility(View.INVISIBLE);
+//                    tips.setVisibility(View.VISIBLE);
+//                    mRecyclerViewBridge2.setWidgetVisible(false);
+//                    categoryLayout.setVisibility(View.INVISIBLE);
+//                }
             }
         });
 
@@ -480,12 +474,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 showNextCategory();
             }
             return true;
-        }
+        }else if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
 
-        else
-        if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
-
-            if (!videoList2.isVisible()){
+            if (layoutMenu.getVisibility()!=View.VISIBLE){
                 showMenu(true);
             }
             return true;
