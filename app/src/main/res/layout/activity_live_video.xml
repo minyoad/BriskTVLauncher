@@ -9,29 +9,29 @@
     android:clipToPadding="false"
     tools:context=".ui.FullScreenVideoActivity">
 
-<!--    <FrameLayout
-        android:id="@+id/videoContent"
-        android:layout_width="@dimen/d_746dp"
-        android:layout_height="@dimen/d_420dp"
-        android:layout_marginBottom="@dimen/d_30dp"
-        android:layout_marginLeft="@dimen/d_60dp"
-        android:layout_marginRight="@dimen/d_30dp"
-        android:layout_marginTop="@dimen/d_30dp"
-        android:background="@mipmap/back"
-        android:focusable="false"
-        android:foregroundGravity="center"
-        android:paddingTop="@dimen/d_36dp"
-        android:paddingBottom="@dimen/d_36dp"
-        android:paddingLeft="@dimen/d_20dp"
-        android:paddingRight="@dimen/d_20dp">
-    </FrameLayout>-->
+    <!--    <FrameLayout
+            android:id="@+id/videoContent"
+            android:layout_width="@dimen/d_746dp"
+            android:layout_height="@dimen/d_420dp"
+            android:layout_marginBottom="@dimen/d_30dp"
+            android:layout_marginLeft="@dimen/d_60dp"
+            android:layout_marginRight="@dimen/d_30dp"
+            android:layout_marginTop="@dimen/d_30dp"
+            android:background="@mipmap/back"
+            android:focusable="false"
+            android:foregroundGravity="center"
+            android:paddingTop="@dimen/d_36dp"
+            android:paddingBottom="@dimen/d_36dp"
+            android:paddingLeft="@dimen/d_20dp"
+            android:paddingRight="@dimen/d_20dp">
+        </FrameLayout>-->
 
     <com.danxx.brisktvlauncher.widget.media.IjkVideoView
-            android:id="@+id/video_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="left"
-            android:focusable="false">
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:focusable="false">
 
     </com.danxx.brisktvlauncher.widget.media.IjkVideoView>
 
@@ -44,55 +44,80 @@
         android:layout_marginTop="@dimen/d_480dp"
         android:background="@color/white44"
         android:focusable="false"
-        android:visibility="gone"
         android:padding="16dp"
         android:text="温馨提示\n本视频源来自于网络，有可能出现暂时不能播放的情况，请见谅。我们会定期更新视频源，给您一个良好的观看体验！( ^_^ )"
-        android:textSize="12sp" />
+        android:textSize="12sp"
+        android:visibility="gone" />
 
 
     <TextView
         android:id="@+id/liveName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:layout_marginRight="@dimen/d_60dp"
+        android:layout_marginTop="@dimen/d_40dp"
+        android:focusable="false"
         android:text="香港电影"
         android:textColor="@color/white"
-        android:focusable="false"
-        android:layout_gravity="top|right"
-        android:layout_marginTop="@dimen/d_40dp"
-        android:layout_marginRight="@dimen/d_60dp"
-        android:textSize="@dimen/s_30sp"/>
+        android:textSize="@dimen/s_30sp" />
+
     <TextView
         android:id="@+id/tips"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="按'菜单'键换台"
-        android:textColor="@color/white"
-        android:focusable="false"
         android:layout_gravity="bottom|left"
         android:layout_marginBottom="@dimen/d_30dp"
         android:layout_marginLeft="@dimen/d_40dp"
-        android:textSize="@dimen/s_18sp"/>
+        android:focusable="false"
+        android:text="按'菜单'键换台"
+        android:textColor="@color/white"
+        android:textSize="@dimen/s_18sp" />
 
     <LinearLayout
         android:layout_width="@dimen/d_640dp"
         android:layout_height="match_parent"
         android:gravity="left"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <com.open.androidtvwidget.recycle.RecyclerViewTV
-            android:id="@+id/videoList"
+        <LinearLayout
+            android:id="@+id/layoutcategory"
             android:layout_width="@dimen/d_320dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="left"
+            android:layout_height="@dimen/s_45sp"
             android:background="#000000"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:focusable="false"
-            android:paddingBottom="@dimen/d_40dp"
-            android:paddingLeft="@dimen/d_40dp"
-            android:paddingRight="@dimen/d_30dp"
-            android:paddingTop="@dimen/d_40dp"
-            android:visibility="invisible"></com.open.androidtvwidget.recycle.RecyclerViewTV>
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="left"
+                android:text="@string/left"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+            <TextView
+                android:id="@+id/txt_category"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:text="@string/right"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText" />
+
+        </LinearLayout>
 
         <com.open.androidtvwidget.recycle.RecyclerViewTV
             android:id="@+id/videoList2"
@@ -113,8 +138,4 @@
 
     </LinearLayout>
 
-    <com.open.androidtvwidget.view.MainUpView
-        android:id="@+id/mainUpView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 </FrameLayout>

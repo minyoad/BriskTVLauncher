@@ -126,4 +126,13 @@ public class Settings {
         mSharedPreferences.edit().putString(key, path).apply();
 
     }
+
+    public void setPrefs(String prefName,String prefValue){
+        mSharedPreferences.edit().putString(prefName, prefValue).apply();
+    }
+
+    public String getPrefs(String prefName){
+        return mSharedPreferences.getString(prefName,null);
+
+    }
 }
