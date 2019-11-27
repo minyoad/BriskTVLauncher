@@ -6,8 +6,7 @@
     android:layout_height="match_parent"
     android:background="@mipmap/bg"
     android:clipChildren="false"
-    android:clipToPadding="false"
-    tools:context=".ui.FullScreenVideoActivity">
+    android:clipToPadding="false">
 
     <!--    <FrameLayout
             android:id="@+id/videoContent"
@@ -83,19 +82,19 @@
         <LinearLayout
             android:id="@+id/layoutcategory"
             android:layout_width="@dimen/d_320dp"
-            android:layout_height="@dimen/s_45sp"
+            android:layout_height="@dimen/s_60sp"
             android:background="#000000"
             android:gravity="center"
             android:orientation="horizontal"
             android:visibility="invisible">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/s_20sp"
                 android:layout_height="match_parent"
-                android:layout_gravity="left"
+                android:layout_gravity="start"
                 android:text="@string/left"
                 android:textColor="#FFFFFF"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 tools:ignore="HardcodedText" />
 
@@ -108,9 +107,9 @@
                 android:textSize="24sp" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/s_20sp"
                 android:layout_height="match_parent"
-                android:layout_gravity="right"
+                android:layout_gravity="end"
                 android:text="@string/right"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
