@@ -25,6 +25,15 @@
             android:paddingRight="@dimen/d_20dp">
         </FrameLayout>-->
 
+    <com.danxx.brisktvlauncher.widget.media.IjkVideoView
+        android:id="@+id/video_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left"
+        android:focusable="false">
+
+    </com.danxx.brisktvlauncher.widget.media.IjkVideoView>
+
     <LinearLayout
         android:id="@+id/layoutMenu"
         android:layout_width="499dp"
@@ -114,14 +123,7 @@
 
     </LinearLayout>
 
-    <com.danxx.brisktvlauncher.widget.media.IjkVideoView
-        android:id="@+id/video_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="left"
-        android:focusable="false">
 
-    </com.danxx.brisktvlauncher.widget.media.IjkVideoView>
 
     <TextView
         android:id="@+id/toast_text_view"
