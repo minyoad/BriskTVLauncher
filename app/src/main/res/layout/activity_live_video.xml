@@ -38,6 +38,7 @@
         android:id="@+id/layoutMenu"
         android:layout_width="499dp"
         android:layout_height="match_parent"
+        android:alpha="100"
         android:orientation="horizontal">
 
         <LinearLayout

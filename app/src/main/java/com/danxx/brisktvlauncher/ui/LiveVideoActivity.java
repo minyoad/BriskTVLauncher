@@ -192,6 +192,10 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 mChannelMap=new HashMap<>();
 
                 for(SimpleM3UParser.M3U_Entry entry:videoList){
+                    if(entry.getGroupTitle()==null || entry.getGroupTitle().isEmpty()){
+                        entry.setGroupTitle("其他");
+                    }
+
                     List<VideoBean> list=mChannelMap.get(entry.getGroupTitle());
                     if(list==null){
                         list=new ArrayList<>();
@@ -239,6 +243,10 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
             @Override
             public void onItemClick(int position, Object data) {
+                myAdapter.toggleSelection(position);
+
+                String catename=(String) categoryList.get(position);
+                showChannelList(catename);
 
             }
 
@@ -272,7 +280,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         videoList1.setLayoutManager(linearLayoutManager1);
 
-
         videoList2 = (RecyclerViewTV) findViewById(R.id.channellist);
 
         mMainUpView2=new MainUpView(this);
@@ -303,6 +310,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         myAdapter2.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, Object data) {
+                myAdapter2.toggleSelection(position);
                 String url = ((VideoBean)data).getTvUrl();
                 playVideo(url,position);
                 showMenu(false);
@@ -328,6 +336,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
                 layoutMenu.setVisibility(visable?View.VISIBLE:View.INVISIBLE);
 
                 if(visable) {
+
+//                    layoutMenu.getBackground().setAlpha(100);
+
 
                     if (selectedCategory == null || selectedCategory.isEmpty()) {
                         selectedCategory = (String) categoryList.get(0);
@@ -360,22 +371,48 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
     public void showChannelList(String cateName){
 
         mRecyclerViewBridge2.setUnFocusView(oldView2);
-        mRecyclerViewBridge2.setWidgetVisible(false);
+//        mRecyclerViewBridge2.setWidgetVisible(false);
 
 //        categoryView.setText(cateName);
 
         selectedCategory=cateName;
 
-        videoList2.setVisibility(View.VISIBLE);
+        int position=categoryList.indexOf(cateName);
+        myAdapter.setFocused(position);
+
+        mRecyclerViewBridge1.setWidgetVisible(true);
+
+
+//        videoList2.setVisibility(View.VISIBLE);
 
         List channelList=mChannelMap.get(cateName);
 
         myAdapter2.setData(channelList);
         myAdapter2.notifyDataSetChanged();
-        videoList2.requestFocus();
+
+        position=getChannelIndex(channelList);
+        if (position>=0){
+            myAdapter2.setFocused(position);
+            View item=videoList2.getLayoutManager().findViewByPosition(position);
+            videoList2.requestChildFocus(item,null);
+        }
+
+//        videoList2.requestFocus();
 
         mRecyclerViewBridge2.setWidgetVisible(true);
 
+    }
+
+    private int getChannelIndex(List<VideoBean> channellist){
+        int pos=-1;
+        for(int i=0;i<channellist.size();i++){
+            VideoBean bean=channellist.get(i);
+            if(bean.getTvUrl().contains(mVideoPath)){
+                pos=i;
+                break;
+            }
+        }
+       return pos;
     }
 
     /**
@@ -652,6 +689,11 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     class MyAdapter extends BaseRecyclerViewAdapter<VideoBean> {
 
+        public void setFocused(int position){
+            clearSelection();
+            toggleSelection(position);
+        }
+
         @Override
         protected BaseRecyclerViewHolder createItem(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(LiveVideoActivity.this).inflate(R.layout.item_live,null);
@@ -662,6 +704,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         @Override
         protected void bindData(BaseRecyclerViewHolder holder, int position) {
             ((MyViewHolder)holder).name.setText(getItemData(position).getTvName());
+            if(isSelected(position)){
+                ((MyViewHolder)holder).name.setBackgroundColor(0xFFA500);
+            }
         }
         class MyViewHolder extends BaseRecyclerViewHolder{
             TextView name;
@@ -672,13 +717,17 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
             @Override
             protected View getView() {
-                return null;
+                return name;
             }
         }
     }
 
     class MyCategoryAdapter extends BaseRecyclerViewAdapter<String> {
 
+        public void setFocused(int position){
+            clearSelection();
+            toggleSelection(position);
+        }
         @Override
         protected BaseRecyclerViewHolder createItem(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(LiveVideoActivity.this).inflate(R.layout.item_live,null);
@@ -689,6 +738,9 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         @Override
         protected void bindData(BaseRecyclerViewHolder holder, int position) {
             ((MyViewHolder)holder).name.setText(getItemData(position));
+            if(isSelected(position)){
+                ((MyViewHolder)holder).name.setBackgroundColor(0xFFA500);
+            }
         }
         class MyViewHolder extends BaseRecyclerViewHolder{
             TextView name;
@@ -699,7 +751,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
             @Override
             protected View getView() {
-                return null;
+                return name;
             }
         }
     }
