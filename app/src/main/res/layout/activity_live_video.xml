@@ -53,7 +53,7 @@
                 android:background="#000000"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:visibility="visible">
+                android:visibility="gone">
 
                 <TextView
                     android:layout_width="@dimen/s_20sp"

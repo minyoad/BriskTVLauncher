@@ -234,6 +234,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         myAdapter=new MyCategoryAdapter();
         myAdapter.setData(categoryList);
+        videoList1.setAdapter(myAdapter);
         myAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener(){
 
             @Override
@@ -317,9 +318,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             selectedCategory=(String) categoryList.get(0);
             playVideo(getDefaultChannel(),0);
         }
-        else{
-//            selectedCategory=
-        }
+
     }
 
     private void showMenu(final boolean visable){
@@ -328,12 +327,12 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             public void run() {
                 layoutMenu.setVisibility(visable?View.VISIBLE:View.INVISIBLE);
 
-//                if(visable){
-//
-//                    if (selectedCategory==null ||selectedCategory.isEmpty()){
-//                        selectedCategory=(String) categoryList.get(0);
-//                    }
-//                    showChannelList(selectedCategory);
+                if(visable) {
+
+                    if (selectedCategory == null || selectedCategory.isEmpty()) {
+                        selectedCategory = (String) categoryList.get(0);
+                    }
+                    showChannelList(selectedCategory);
 //                    categoryLayout.setVisibility(View.VISIBLE);
 //
 //                    videoList2.scrollToPosition(0);
@@ -351,6 +350,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 //                    mRecyclerViewBridge2.setWidgetVisible(false);
 //                    categoryLayout.setVisibility(View.INVISIBLE);
 //                }
+                }
             }
         });
 
@@ -362,7 +362,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         mRecyclerViewBridge2.setUnFocusView(oldView2);
         mRecyclerViewBridge2.setWidgetVisible(false);
 
-        categoryView.setText(cateName);
+//        categoryView.setText(cateName);
 
         selectedCategory=cateName;
 
@@ -372,8 +372,8 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         myAdapter2.setData(channelList);
         myAdapter2.notifyDataSetChanged();
-
         videoList2.requestFocus();
+
         mRecyclerViewBridge2.setWidgetVisible(true);
 
     }
@@ -459,31 +459,63 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_DPAD_UP){
+            if(layoutMenu.getVisibility()==View.VISIBLE){
+                if(videoList1.isFocused()){
+                    showPreviousCategory();
+//                    videoList2.requestFocus();
+                }
+            }
+            return true;
+        }
+        if(keyCode==KeyEvent.KEYCODE_DPAD_DOWN){
+
+            if(layoutMenu.getVisibility()==View.VISIBLE){
+                if(videoList1.isFocused()){
+                    showNextCategory();
+//                    videoList2.requestFocus();
+                }
+            }
+            return true;
+        }
         if(keyCode==KeyEvent.KEYCODE_DPAD_LEFT){
-            if(videoList2.isVisible()) {
-                showPreviousCategory();
+            if(videoList2.isFocused()){
+                videoList1.requestFocus();
+            }else if (layoutMenu.getVisibility()==View.INVISIBLE){
+                layoutMenu.setVisibility(View.VISIBLE);
             }
-            else{
-                showMenu(true);
-            }
+
+
+//            if(videoList2.isVisible()) {
+//                showPreviousCategory();
+//            }
+//            else{
+//                showMenu(true);
+//            }
 
             return true;
         }else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
 
-            if(videoList2.isVisible()) {
-                showNextCategory();
+            if(layoutMenu.getVisibility()==View.VISIBLE){
+                if(videoList1.isFocused()){
+                    videoList2.requestFocus();
+                }
             }
+
+//            if(videoList2.isVisible()) {
+//                showNextCategory();
+//            }
             return true;
         }else if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
 
-            if (layoutMenu.getVisibility()!=View.VISIBLE){
+            if (layoutMenu.getVisibility()==View.INVISIBLE){
                 showMenu(true);
             }
             return true;
 
         }else if(KeyEvent.KEYCODE_BACK == keyCode){
 
-            if (videoList2.isVisible()){
+            if (layoutMenu.getVisibility()==View.VISIBLE){
                 showMenu(false);
             }
             return true;
