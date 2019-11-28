@@ -310,7 +310,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         myAdapter2.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position, Object data) {
-                myAdapter2.toggleSelection(position);
+                myAdapter2.setFocused(position);
                 String url = ((VideoBean)data).getTvUrl();
                 playVideo(url,position);
                 showMenu(false);
@@ -394,6 +394,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         if (position>=0){
             myAdapter2.setFocused(position);
             View item=videoList2.getLayoutManager().findViewByPosition(position);
+            videoList2.scrollToPosition(position);
             videoList2.requestChildFocus(item,null);
         }
 
@@ -705,7 +706,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         protected void bindData(BaseRecyclerViewHolder holder, int position) {
             ((MyViewHolder)holder).name.setText(getItemData(position).getTvName());
             if(isSelected(position)){
-                ((MyViewHolder)holder).name.setBackgroundColor(0xFFA500);
+                ((MyViewHolder)holder).name.setBackgroundColor(android.graphics.Color.RED);
             }
         }
         class MyViewHolder extends BaseRecyclerViewHolder{
@@ -739,7 +740,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
         protected void bindData(BaseRecyclerViewHolder holder, int position) {
             ((MyViewHolder)holder).name.setText(getItemData(position));
             if(isSelected(position)){
-                ((MyViewHolder)holder).name.setBackgroundColor(0xFFA500);
+                ((MyViewHolder)holder).name.setBackgroundColor(android.graphics.Color.RED);
             }
         }
         class MyViewHolder extends BaseRecyclerViewHolder{
