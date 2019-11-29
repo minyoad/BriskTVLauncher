@@ -7,7 +7,6 @@ android {
     //noinspection GroovyAssignabilityCheck
 //    buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
 
     defaultConfig {
         minSdkVersion 15

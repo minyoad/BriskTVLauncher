@@ -278,6 +278,7 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
             }
         });
 
+
         videoList1.setLayoutManager(linearLayoutManager1);
 
         videoList2 = (RecyclerViewTV) findViewById(R.id.channellist);
@@ -382,9 +383,6 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
         mRecyclerViewBridge1.setWidgetVisible(true);
 
-
-//        videoList2.setVisibility(View.VISIBLE);
-
         List channelList=mChannelMap.get(cateName);
 
         myAdapter2.setData(channelList);
@@ -471,102 +469,80 @@ public class LiveVideoActivity extends AppCompatActivity implements TracksFragme
 
     private void showPreviousCategory(){
         int index = categoryList.indexOf(selectedCategory);
-        String newCategory = "";
-        if (index > 0) {
-            newCategory = (String) categoryList.get(index - 1);
-        } else {
-            newCategory = (String) categoryList.get(0);
-        }
+        String newCategory = index>0?(String)categoryList.get(index-1):(String)categoryList.get(0);
 
         showChannelList(newCategory);
     }
 
     private void showNextCategory(){
         int index = categoryList.indexOf(selectedCategory);
-        String newCategory = "";
-        if (index < categoryList.size()-1) {
-            newCategory = (String) categoryList.get(index +1);
-        } else {
-            newCategory = (String) categoryList.get(0);
-        }
+
+        String newCategory = index <categoryList.size()-1?(String)categoryList.get(index+1):(String)categoryList.get(0);
 
         showChannelList(newCategory);
     }
 
 
-
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode==KeyEvent.KEYCODE_DPAD_UP){
-            if(layoutMenu.getVisibility()==View.VISIBLE){
-                if(videoList1.isFocused()){
-                    showPreviousCategory();
-//                    videoList2.requestFocus();
+
+        Log.d(TAG,"onKeyDown:"+keyCode);
+        switch (keyCode){
+            case KeyEvent.KEYCODE_DPAD_UP:
+                if(layoutMenu.getVisibility()==View.VISIBLE){
+                    if(videoList1.isFocused()){
+                        showPreviousCategory();
+                    }
                 }
-            }
-            return true;
-        }
-        if(keyCode==KeyEvent.KEYCODE_DPAD_DOWN){
-
-            if(layoutMenu.getVisibility()==View.VISIBLE){
-                if(videoList1.isFocused()){
-                    showNextCategory();
-//                    videoList2.requestFocus();
+                break;
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+                if(layoutMenu.getVisibility()==View.VISIBLE){
+                    if(videoList1.isFocused()){
+                        showNextCategory();
+                    }
                 }
-            }
-            return true;
-        }
-        if(keyCode==KeyEvent.KEYCODE_DPAD_LEFT){
-            if(videoList2.isFocused()){
-                videoList1.requestFocus();
-            }else if (layoutMenu.getVisibility()==View.INVISIBLE){
-                layoutMenu.setVisibility(View.VISIBLE);
-            }
-
-
-//            if(videoList2.isVisible()) {
-//                showPreviousCategory();
-//            }
-//            else{
-//                showMenu(true);
-//            }
-
-            return true;
-        }else if(keyCode==KeyEvent.KEYCODE_DPAD_RIGHT){
-
-            if(layoutMenu.getVisibility()==View.VISIBLE){
-                if(videoList1.isFocused()){
-                    videoList2.requestFocus();
+                break;
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                if(videoList2.isFocused()){
+                    videoList1.requestFocus();
+                }else if (layoutMenu.getVisibility()==View.INVISIBLE){
+                    layoutMenu.setVisibility(View.VISIBLE);
                 }
-            }
+                break;
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
 
-//            if(videoList2.isVisible()) {
-//                showNextCategory();
-//            }
-            return true;
-        }else if(KeyEvent.KEYCODE_DPAD_CENTER == keyCode || KeyEvent.KEYCODE_ENTER == keyCode){
+                if(layoutMenu.getVisibility()==View.VISIBLE){
+                    if(videoList1.isFocused()){
+                        videoList2.requestFocus();
+                    }
+                }
+                break;
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
 
-            if (layoutMenu.getVisibility()==View.INVISIBLE){
-                showMenu(true);
-            }
-            return true;
+                if (layoutMenu.getVisibility()==View.INVISIBLE){
+                    showMenu(true);
+                }
+                break;
 
-        }else if(KeyEvent.KEYCODE_BACK == keyCode){
+            case KeyEvent.KEYCODE_BACK:
 
-            if (layoutMenu.getVisibility()==View.VISIBLE){
-                showMenu(false);
-            }
-            return true;
+                if (layoutMenu.getVisibility()==View.VISIBLE){
+                    showMenu(false);
+                }
+                break;
 
-        }else if(KeyEvent.KEYCODE_MENU == keyCode){
+            case KeyEvent.KEYCODE_MENU:
 
-            showMenu(!videoList2.isVisible());
-            return true;
+                showMenu(!videoList2.isVisible());
+                break;
+
+            default:
+                return super.onKeyDown(keyCode, event);
 
         }
-        return super.onKeyDown(keyCode, event);
+        return true;
     }
-
 
 
     @Override
